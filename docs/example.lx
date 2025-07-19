@@ -1,0 +1,41 @@
+Vector3 (
+	x F32
+	y F32
+	z F32
+
+	new(x F32, y F32, z F32) Vector3(x, y, z)
+
+	Vector3:len_sq() x^2 + y^2 + z^2
+	Vector3:len() sqrt(len_sq())
+
+	Vector3:to_string() "({x}, {y}, {z})"
+)
+
+Person (
+	name String
+	age  U8
+
+	new(name String, age U8) Person(name, age)
+
+	Person:to_string() "{name} (age {age})"
+)
+
+DynToString (
+	self ()
+	self:to_string() String
+)
+
+main() {
+	my_list []DynToString = []
+
+	my_list ++= Vector3.new(1.0, 2.0, 3.0):DynToString(Vector3.to_string)
+	my_list ++= Vector3.new(4.0, 5.0, 6.0):DynToString(Vector3.to_string)
+	my_list ++= Person.new("Alexander", 20):DynToString(Person.to_string)
+
+	-- we may omit trailing parenthesis on method invocations with no arguments
+	strings = my_list:map((obj) obj:to_string)
+}
+
+ToString (
+	to_string()
+)
