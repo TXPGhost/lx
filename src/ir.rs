@@ -113,7 +113,10 @@ impl IntoIr for ast::Struct {
                 }
             }
         }
-        todo!()
+        Ok(Rc::new(RefCell::new(Struct {
+            fields,
+            parent: ctxt.clone(),
+        })))
     }
 }
 
@@ -131,7 +134,13 @@ impl IntoIr for ast::Ident {
 impl IntoIr for ast::Expr {
     type Ir = Expr;
 
-    fn into_ir(self, _: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
-        todo!()
+    fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
+        match self {
+            ast::Expr::Ident(ident) => Ok(Expr::Ident(ident.into_ir(ctxt.clone())?)),
+            ast::Expr::I32(n) => Ok(Expr::I32(n)),
+            ast::Expr::Struct(struct_) => Ok(Expr::Struct(struct_.into_ir(ctxt.clone())?)),
+            ast::Expr::Block(block) => todo!(),
+            ast::Expr::Binop(expr, binop, expr1) => todo!(),
+        }
     }
 }
