@@ -1,0 +1,191 @@
+use super::*;
+
+pub fn args(args: impl Into<Vec<Arg>>) -> Args {
+    Args { args: args.into() }
+}
+
+pub fn estruct(fields: impl Into<Vec<Field>>) -> Expr {
+    Expr::Struct(Struct {
+        fields: fields.into(),
+    })
+}
+
+pub fn estring(string: impl Into<String>) -> Expr {
+    Expr::Value(Value::String(string.into()))
+}
+
+pub fn echar(char: char) -> Expr {
+    Expr::Value(Value::Char(char as u8))
+}
+
+pub fn istruct(fields: impl Into<Vec<Field>>) -> Field {
+    Field::Inline(Expr::Struct(Struct {
+        fields: fields.into(),
+    }))
+}
+
+pub fn field(ident: Ident, expr: Expr) -> Field {
+    Field::Field(ident, expr)
+}
+
+pub fn arg(ident: Ident, expr: Expr) -> Arg {
+    Arg::Named(false, ident, expr)
+}
+
+pub fn arg_mut(ident: Ident, expr: Expr) -> Arg {
+    Arg::Named(true, ident, expr)
+}
+
+pub fn aident(ident: Ident) -> Arg {
+    Arg::Ident(false, ident)
+}
+
+pub fn aident_mut(ident: Ident) -> Arg {
+    Arg::Ident(true, ident)
+}
+
+pub fn fspacer() -> Field {
+    Field::Spacer
+}
+
+pub fn inline(expr: Expr) -> Field {
+    Field::Inline(expr)
+}
+
+pub fn vid(name: &'static str) -> Ident {
+    Ident {
+        name: name.into(),
+        is_type: false,
+        is_void: false,
+    }
+}
+
+pub fn tid(name: &'static str) -> Ident {
+    Ident {
+        name: name.into(),
+        is_type: true,
+        is_void: false,
+    }
+}
+
+pub fn void() -> Ident {
+    Ident {
+        name: "_".into(),
+        is_type: false,
+        is_void: true,
+    }
+}
+
+pub fn evid(name: &'static str) -> Expr {
+    Expr::Ident(vid(name))
+}
+
+pub fn etid(name: &'static str) -> Expr {
+    Expr::Ident(tid(name))
+}
+
+pub fn ei32(n: i32) -> Expr {
+    Expr::Value(Value::I32(n))
+}
+
+pub fn add(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Add, Box::new(rhs))
+}
+
+pub fn sub(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Sub, Box::new(rhs))
+}
+
+pub fn mul(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Mul, Box::new(rhs))
+}
+
+pub fn div(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Div, Box::new(rhs))
+}
+
+pub fn pow(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Pow, Box::new(rhs))
+}
+
+pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
+    Block {
+        stmts: stmts.into(),
+    }
+}
+
+pub fn eblock(stmts: impl Into<Vec<Stmt>>) -> Expr {
+    Expr::Block(Block {
+        stmts: stmts.into(),
+    })
+}
+
+pub fn efunc(args: Args, body: Expr) -> Expr {
+    Expr::Func(Func {
+        args,
+        body: Box::new(body),
+    })
+}
+
+pub fn eproj(expr: Expr, field: Ident) -> Expr {
+    Expr::Project(Project {
+        expr: Box::new(expr),
+        field,
+    })
+}
+
+pub fn call(func: Expr, args: impl Into<Vec<Expr>>) -> Call {
+    Call {
+        func: Box::new(func),
+        args: args.into(),
+        method_syntax: false,
+    }
+}
+
+pub fn ecall(func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
+    Expr::Call(Call {
+        func: Box::new(func),
+        args: args.into(),
+        method_syntax: false,
+    })
+}
+
+pub fn method(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Call {
+    let mut args = args.into();
+    args.insert(0, obj);
+    Call {
+        func: Box::new(func),
+        args,
+        method_syntax: true,
+    }
+}
+
+pub fn emethod(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
+    let mut args = args.into();
+    args.insert(0, obj);
+    Expr::Call(Call {
+        func: Box::new(func),
+        args,
+        method_syntax: true,
+    })
+}
+
+pub fn sbind(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Bind(ident, expr)
+}
+
+pub fn sbindmut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
+    Stmt::BindMut(ident, ty, expr)
+}
+
+pub fn swrite(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Write(ident, expr)
+}
+
+pub fn sadd(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Add, expr)
+}
+
+pub fn sexpr(expr: Expr) -> Stmt {
+    Stmt::Expr(expr)
+}

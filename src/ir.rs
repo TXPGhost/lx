@@ -104,6 +104,10 @@ impl Ident {
         match self {
             Ident::VIdent(ident) | Ident::TIdent(ident) => ident.as_ref(),
             Ident::Binop(Binop::Add) => "(+)",
+            Ident::Binop(Binop::Sub) => "(-)",
+            Ident::Binop(Binop::Mul) => "(*)",
+            Ident::Binop(Binop::Div) => "(/)",
+            Ident::Binop(Binop::Pow) => "(^)",
             Ident::Void => "_",
         }
     }

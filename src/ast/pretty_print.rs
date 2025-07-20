@@ -73,12 +73,20 @@ impl PrettyPrint for Struct {
             return format!("{}", "()".color(PUNCTUATION));
         }
         if self.fields.len() == 1 {
-            return format!(
-                "{}{}{}",
-                "(".color(PUNCTUATION),
-                self.fields[0].pretty_print(ctxt),
-                ")".color(PUNCTUATION)
-            );
+            if let Field::Inline(expr) | Field::Field(_, expr) = &self.fields[0] {
+                let mut is_large = false;
+                if let Expr::Struct(_) | Expr::Block(_) = expr {
+                    is_large = true;
+                }
+                if !is_large {
+                    return format!(
+                        "{}{}{}",
+                        "(".color(PUNCTUATION),
+                        self.fields[0].pretty_print(ctxt),
+                        ")".color(PUNCTUATION)
+                    );
+                }
+            }
         }
         let mut s = String::new();
         s += &format!("{}\n", "(".color(PUNCTUATION));
@@ -98,22 +106,14 @@ impl PrettyPrint for Args {
         if self.args.is_empty() {
             return format!("{}", "()".color(OPERATOR));
         }
-        if self.args.len() == 1 {
-            return format!(
-                "{}{}{}",
-                "(".color(OPERATOR),
-                self.args[0].pretty_print(ctxt),
-                ")".color(OPERATOR)
-            );
-        }
         let mut s = String::new();
-        s += &format!("{}\n", "(".color(OPERATOR));
-        for field in &self.args {
-            s += &ctxt.indented().indent();
-            s += &field.pretty_print(ctxt);
-            s += "\n";
+        s += &format!("{}", "(".color(OPERATOR));
+        for i in 0..self.args.len() {
+            s += &self.args[i].pretty_print(ctxt);
+            if i < self.args.len() - 1 {
+                s += &format!("{} ", ",".color(PUNCTUATION));
+            }
         }
-        s += &ctxt.indent();
         s += &format!("{}", ")".color(OPERATOR));
         s
     }
@@ -263,6 +263,10 @@ impl PrettyPrint for Binop {
     fn pretty_print(&self, _: PrettyPrintContext) -> String {
         match self {
             Binop::Add => format!("{}", "+".color(OPERATOR)),
+            Binop::Sub => format!("{}", "-".color(OPERATOR)),
+            Binop::Mul => format!("{}", "*".color(OPERATOR)),
+            Binop::Div => format!("{}", "/".color(OPERATOR)),
+            Binop::Pow => format!("{}", "^".color(OPERATOR)),
         }
     }
 }
@@ -318,6 +322,11 @@ impl PrettyPrint for Func {
 impl PrettyPrint for Call {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         let mut s = String::new();
+        if self.method_syntax {
+            assert!(!self.args.is_empty());
+            s += &self.args[0].pretty_print(ctxt);
+            s += &format!("{}", ":".color(PUNCTUATION));
+        }
         match &*self.func {
             Expr::Ident(ident) => {
                 s += &format!(
@@ -331,14 +340,17 @@ impl PrettyPrint for Call {
             }
             _ => s += &self.func.pretty_print(ctxt),
         }
+        // if !(self.method_syntax && self.args.len() == 1) {
         s += &format!("{}", "(".color(OPERATOR));
-        for i in 0..self.args.len() {
+        let start_idx = if self.method_syntax { 1 } else { 0 };
+        for i in start_idx..self.args.len() {
             s += &self.args[i].pretty_print(ctxt);
             if i < self.args.len() - 1 {
-                s += &format!("{}", ", ".color(OPERATOR));
+                s += &format!("{}", ", ".color(PUNCTUATION));
             }
         }
         s += &format!("{}", ")".color(OPERATOR));
+        // }
         s
     }
 }
@@ -348,7 +360,7 @@ impl PrettyPrint for Project {
         format!(
             "{}{}{}",
             self.expr.pretty_print(ctxt),
-            ".".color(OPERATOR),
+            ".".color(PUNCTUATION),
             if self.field.is_type {
                 self.field.name.bold().color(TYPE)
             } else {
