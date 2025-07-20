@@ -22,15 +22,24 @@ fn main() {
             fspacer(),
             field(
                 vid("unit_x"),
-                ecall(etid("Vector3"), [ei32(1), ei32(0), ei32(0)]),
+                ecall(
+                    eproj(etid("Vector3"), vid("new")),
+                    [ei32(1), ei32(0), ei32(0)],
+                ),
             ),
             field(
                 vid("unit_y"),
-                ecall(etid("Vector3"), [ei32(0), ei32(1), ei32(0)]),
+                ecall(
+                    eproj(etid("Vector3"), vid("new")),
+                    [ei32(0), ei32(1), ei32(0)],
+                ),
             ),
             field(
                 vid("unit_z"),
-                ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(1)]),
+                ecall(
+                    eproj(etid("Vector3"), vid("new")),
+                    [ei32(0), ei32(0), ei32(1)],
+                ),
             ),
             fspacer(),
             field(
@@ -89,6 +98,19 @@ fn main() {
                             estring(")"),
                         ),
                     ),
+                ),
+            ),
+            fspacer(),
+            field(
+                vid("normalize"),
+                efunc(
+                    args([arg_mut(vid("self"), etid("Vector3"))]),
+                    eblock([
+                        sbind(vid("len"), emethod(evid("self"), evid("len"), [])),
+                        sdiv(vid("self_DOT_x"), evid("len")),
+                        sdiv(vid("self_DOT_y"), evid("len")),
+                        sdiv(vid("self_DOT_z"), evid("len")),
+                    ]),
                 ),
             ),
         ]),

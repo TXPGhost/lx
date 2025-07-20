@@ -190,6 +190,26 @@ pub fn sadd(ident: Ident, expr: Expr) -> Stmt {
     Stmt::Update(ident, Binop::Add, expr)
 }
 
+pub fn ssub(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Sub, expr)
+}
+
+pub fn smul(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Mul, expr)
+}
+
+pub fn sdiv(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Div, expr)
+}
+
+pub fn spow(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Pow, expr)
+}
+
+pub fn sconcat(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Concat, expr)
+}
+
 pub fn sexpr(expr: Expr) -> Stmt {
     Stmt::Expr(expr)
 }

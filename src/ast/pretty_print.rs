@@ -1,3 +1,5 @@
+use std::{borrow::Cow, collections::HashSet};
+
 use colored::{Color, Colorize};
 
 use super::*;
@@ -43,32 +45,46 @@ pub const STRING: Color = Color::TrueColor {
     b: 135,
 };
 
-#[derive(Clone, Copy, Default)]
-pub struct PrettyPrintContext {
+#[derive(Clone, Default)]
+pub struct PrettyPrintContext<'parent> {
     pub indent_level: usize,
+    pub argumets: Cow<'parent, HashSet<String>>,
 }
 
-impl PrettyPrintContext {
-    pub fn indented(self) -> PrettyPrintContext {
+impl<'parent> PrettyPrintContext<'parent> {
+    pub fn indented(&self) -> PrettyPrintContext<'parent> {
         PrettyPrintContext {
             indent_level: self.indent_level + 1,
+            ..self.clone()
         }
     }
 
     pub fn indent(&self) -> String {
         "    ".repeat(self.indent_level)
     }
+
+    pub fn add_argument(&mut self, argument: String) {
+        self.argumets.to_mut().insert(argument);
+    }
+
+    pub fn remove_argument(&mut self, argument: &str) {
+        self.argumets.to_mut().remove(argument);
+    }
+
+    pub fn is_argument(&self, argument: &str) -> bool {
+        self.argumets.contains(argument)
+    }
 }
 
 pub trait PrettyPrint {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String;
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String;
     fn pretty_print_string(&self) -> String {
-        self.pretty_print(PrettyPrintContext::default())
+        self.pretty_print(&mut PrettyPrintContext::default())
     }
 }
 
 impl PrettyPrint for Struct {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.fields.is_empty() {
             return format!("{}", "()".color(PUNCTUATION));
         }
@@ -102,7 +118,7 @@ impl PrettyPrint for Struct {
 }
 
 impl PrettyPrint for Args {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.args.is_empty() {
             return format!("{}", "()".color(OPERATOR));
         }
@@ -120,7 +136,7 @@ impl PrettyPrint for Args {
 }
 
 impl PrettyPrint for Field {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Field::Field(ident, expr) => {
                 format!(
@@ -129,13 +145,13 @@ impl PrettyPrint for Field {
                         true => ident.name.bold().color(MEMBER),
                         false => ident.name.color(MEMBER),
                     },
-                    expr.pretty_print(ctxt.indented())
+                    expr.pretty_print(&mut ctxt.indented())
                 )
             }
             Field::Inline(expr) => format!(
                 "{}{}",
                 "..".color(PUNCTUATION),
-                expr.pretty_print(ctxt.indented())
+                expr.pretty_print(&mut ctxt.indented())
             ),
             Field::Spacer => "".to_string(),
         }
@@ -143,9 +159,10 @@ impl PrettyPrint for Field {
 }
 
 impl PrettyPrint for Arg {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Arg::Named(is_mut, ident, expr) => {
+                ctxt.add_argument(ident.name.as_ref().to_owned());
                 format!(
                     "{}{} {}",
                     (if *is_mut { "&" } else { "" }).color(PUNCTUATION),
@@ -153,10 +170,11 @@ impl PrettyPrint for Arg {
                         true => ident.name.italic().bold().color(NORMAL),
                         false => ident.name.italic().color(NORMAL),
                     },
-                    expr.pretty_print(ctxt.indented())
+                    expr.pretty_print(&mut ctxt.indented())
                 )
             }
             Arg::Ident(is_mut, ident) => {
+                ctxt.add_argument(ident.name.as_ref().to_owned());
                 format!(
                     "{}{}",
                     (if *is_mut { "&" } else { "" }).color(PUNCTUATION),
@@ -171,17 +189,18 @@ impl PrettyPrint for Arg {
 }
 
 impl PrettyPrint for Ident {
-    fn pretty_print(&self, _: PrettyPrintContext) -> String {
-        if self.is_type {
-            format!("{}", self.name.as_ref().bold().color(TYPE))
-        } else {
-            format!("{}", self.name.as_ref().color(NORMAL))
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
+        match (self.is_type, ctxt.is_argument(&self.name)) {
+            (true, true) => format!("{}", self.name.as_ref().italic().bold().color(TYPE)),
+            (true, false) => format!("{}", self.name.as_ref().bold().color(TYPE)),
+            (false, true) => format!("{}", self.name.as_ref().italic().color(NORMAL)),
+            (false, false) => format!("{}", self.name.as_ref().color(NORMAL)),
         }
     }
 }
 
 impl PrettyPrint for Expr {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Expr::Ident(ident) => ident.pretty_print(ctxt),
             Expr::Value(value) => value.pretty_print(ctxt),
@@ -201,7 +220,7 @@ impl PrettyPrint for Expr {
 }
 
 impl PrettyPrint for Value {
-    fn pretty_print(&self, _: PrettyPrintContext) -> String {
+    fn pretty_print(&self, _: &mut PrettyPrintContext) -> String {
         match self {
             Value::I32(n) => format!("{}", n.to_string().color(CONSTANT)),
             Value::String(s) => {
@@ -234,7 +253,7 @@ impl PrettyPrint for Value {
 }
 
 impl PrettyPrint for Block {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.stmts.is_empty() {
             return format!("{}", "{}".color(PUNCTUATION));
         }
@@ -260,7 +279,7 @@ impl PrettyPrint for Block {
 }
 
 impl PrettyPrint for Binop {
-    fn pretty_print(&self, _: PrettyPrintContext) -> String {
+    fn pretty_print(&self, _: &mut PrettyPrintContext) -> String {
         match self {
             Binop::Add => format!("{}", "+".color(OPERATOR)),
             Binop::Sub => format!("{}", "-".color(OPERATOR)),
@@ -273,9 +292,10 @@ impl PrettyPrint for Binop {
 }
 
 impl PrettyPrint for Stmt {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Stmt::Bind(ident, expr) => {
+                ctxt.remove_argument(&ident.name);
                 format!(
                     "{} {} {}",
                     ident.pretty_print(ctxt),
@@ -283,13 +303,16 @@ impl PrettyPrint for Stmt {
                     expr.pretty_print(ctxt)
                 )
             }
-            Stmt::BindMut(ident, ty, expr) => format!(
-                "{} {} {} {}",
-                ident.pretty_print(ctxt),
-                ty.pretty_print(ctxt),
-                "=".color(OPERATOR),
-                expr.pretty_print(ctxt)
-            ),
+            Stmt::BindMut(ident, ty, expr) => {
+                ctxt.remove_argument(&ident.name);
+                format!(
+                    "{} {} {} {}",
+                    ident.pretty_print(ctxt),
+                    ty.pretty_print(ctxt),
+                    "=".color(OPERATOR),
+                    expr.pretty_print(ctxt)
+                )
+            }
             Stmt::Write(ident, expr) => {
                 format!(
                     "{} {} {}",
@@ -311,7 +334,7 @@ impl PrettyPrint for Stmt {
 }
 
 impl PrettyPrint for Func {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         format!(
             "{} {}",
             self.args.pretty_print(ctxt),
@@ -321,7 +344,7 @@ impl PrettyPrint for Func {
 }
 
 impl PrettyPrint for Call {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         let mut s = String::new();
         if self.method_syntax {
             assert!(!self.args.is_empty());
@@ -357,7 +380,7 @@ impl PrettyPrint for Call {
 }
 
 impl PrettyPrint for Project {
-    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         format!(
             "{}{}{}",
             self.expr.pretty_print(ctxt),
