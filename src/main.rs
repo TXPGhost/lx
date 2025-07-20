@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod colorscheme;
 pub mod eval;
 pub mod ir;
 
@@ -140,9 +141,9 @@ fn main() {
                         args([arg_mut(vid("self"), etid("Vector3"))]),
                         eblock([
                             sbind(vid("len"), emethod(evid("self"), evid("len"), [])),
-                            sdiv(vid("self_DOT_x"), evid("len")),
-                            sdiv(vid("self_DOT_y"), evid("len")),
-                            sdiv(vid("self_DOT_z"), evid("len")),
+                            sdiv(eproj(evid("self"), vid("x")), evid("len")),
+                            sdiv(eproj(evid("self"), vid("y")), evid("len")),
+                            sdiv(eproj(evid("self"), vid("z")), evid("len")),
                         ]),
                     ),
                 ),

@@ -205,32 +205,32 @@ pub fn sbindmut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
     Stmt::BindMut(ident, ty, expr)
 }
 
-pub fn swrite(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Write(ident, expr)
+pub fn swrite(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Write(lhs, rhs)
 }
 
-pub fn sadd(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Update(ident, Binop::Add, expr)
+pub fn sadd(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Update(lhs, Binop::Add, rhs)
 }
 
-pub fn ssub(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Update(ident, Binop::Sub, expr)
+pub fn ssub(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Update(lhs, Binop::Sub, rhs)
 }
 
-pub fn smul(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Update(ident, Binop::Mul, expr)
+pub fn smul(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Update(lhs, Binop::Mul, rhs)
 }
 
-pub fn sdiv(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Update(ident, Binop::Div, expr)
+pub fn sdiv(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Update(lhs, Binop::Div, rhs)
 }
 
-pub fn spow(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Update(ident, Binop::Pow, expr)
+pub fn spow(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Update(lhs, Binop::Pow, rhs)
 }
 
-pub fn sconcat(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Update(ident, Binop::Concat, expr)
+pub fn sconcat(lhs: Expr, rhs: Expr) -> Stmt {
+    Stmt::Update(lhs, Binop::Concat, rhs)
 }
 
 pub fn sexpr(expr: Expr) -> Stmt {

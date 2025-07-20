@@ -77,8 +77,8 @@ pub struct Block {
 pub enum Stmt {
     Bind(Ident, Expr),
     BindMut(Ident, Expr, Expr),
-    Write(Ident, Expr),
-    Update(Ident, Binop, Expr),
+    Write(Expr, Expr),
+    Update(Expr, Binop, Expr),
     Expr(Expr),
 }
 
