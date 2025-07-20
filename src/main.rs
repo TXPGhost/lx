@@ -28,6 +28,7 @@ fn main() {
                 sbind(vid("x"), ei32(42)),
                 sbindmut(vid("y"), etid("I32"), ei32(24)),
                 sbind(vid("z"), add(evid("x"), evid("y"))),
+                sbind(vid("tmp"), estring("some string value")),
                 sexpr(evid("z")),
             ]),
         ),
@@ -42,6 +43,7 @@ fn main() {
             vid("single"),
             estruct([field(vid("value"), etid("String"))]),
         ),
+        field(vid("msg"), estring("Hello, world!")),
     ]);
 
     println!("{}", ast.pretty_print_string());

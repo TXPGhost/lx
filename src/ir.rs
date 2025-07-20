@@ -1,4 +1,7 @@
-use crate::ast::{self, Binop};
+use crate::{
+    ast::{self, Binop},
+    eval::Value,
+};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17,7 +20,7 @@ pub enum Ident {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expr {
     Ident(Ident),
-    I32(i32),
+    Value(Value),
     Struct(Rc<RefCell<Struct>>),
     Block(Block),
     Call(Call),
@@ -139,7 +142,7 @@ impl IntoIr for ast::Expr {
     fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
         match self {
             ast::Expr::Ident(ident) => Ok(Expr::Ident(ident.into_ir(ctxt.clone())?)),
-            ast::Expr::I32(n) => Ok(Expr::I32(n)),
+            ast::Expr::Value(value) => Ok(Expr::Value(value)),
             ast::Expr::Struct(struct_) => Ok(Expr::Struct(struct_.into_ir(ctxt.clone())?)),
             ast::Expr::Block(block) => Ok(Expr::Block(block.into_ir(ctxt.clone())?)),
             ast::Expr::Binop(lhs, binop, rhs) => Ok(Expr::Call(Call {

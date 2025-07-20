@@ -2,6 +2,8 @@ pub mod pretty_print;
 
 use std::rc::Rc;
 
+use crate::eval::Value;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
     pub fields: Vec<Field>,
@@ -22,7 +24,7 @@ pub struct Ident {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expr {
     Ident(Ident),
-    I32(i32),
+    Value(Value),
     Struct(Struct),
     Block(Block),
     Binop(Box<Expr>, Binop, Box<Expr>),
@@ -58,6 +60,10 @@ pub fn estruct(fields: impl Into<Vec<Field>>) -> Expr {
     Expr::Struct(Struct {
         fields: fields.into(),
     })
+}
+
+pub fn estring(string: impl Into<String>) -> Expr {
+    Expr::Value(Value::String(string.into()))
 }
 
 pub fn istruct(fields: impl Into<Vec<Field>>) -> Field {
@@ -97,7 +103,7 @@ pub fn etid(name: &'static str) -> Expr {
 }
 
 pub fn ei32(n: i32) -> Expr {
-    Expr::I32(n)
+    Expr::Value(Value::I32(n))
 }
 
 pub fn add(lhs: Expr, rhs: Expr) -> Expr {

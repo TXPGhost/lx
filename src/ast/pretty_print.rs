@@ -37,6 +37,11 @@ pub const GROUP: Color = Color::TrueColor {
     g: 132,
     b: 122,
 };
+pub const STRING: Color = Color::TrueColor {
+    r: 98,
+    g: 147,
+    b: 187,
+};
 
 #[derive(Clone, Copy, Default)]
 pub struct PrettyPrintContext {
@@ -125,7 +130,13 @@ impl PrettyPrint for Expr {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         match self {
             Expr::Ident(ident) => ident.pretty_print(ctxt),
-            Expr::I32(n) => format!("{}", n.to_string().color(CONST)),
+            Expr::Value(Value::I32(n)) => format!("{}", n.to_string().color(CONST)),
+            Expr::Value(Value::String(s)) => format!(
+                "{}{}{}",
+                "\"".color(STRING),
+                s.to_string().color(STRING),
+                "\"".color(STRING)
+            ),
             Expr::Struct(struct_) => struct_.pretty_print(ctxt),
             Expr::Block(block) => block.pretty_print(ctxt),
             Expr::Binop(lhs, op, rhs) => format!(
