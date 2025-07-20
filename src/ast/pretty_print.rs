@@ -78,7 +78,11 @@ impl PrettyPrint for Field {
 
 impl PrettyPrint for Ident {
     fn pretty_print(&self, _: PrettyPrintContext) -> String {
-        self.name.as_ref().to_owned()
+        if self.is_type {
+            format!("{}", self.name.as_ref().bold())
+        } else {
+            self.name.as_ref().to_owned()
+        }
     }
 }
 
