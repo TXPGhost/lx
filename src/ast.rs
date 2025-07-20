@@ -60,7 +60,7 @@ pub fn estruct(fields: impl Into<Vec<Field>>) -> Expr {
     })
 }
 
-pub fn inline_struct(fields: impl Into<Vec<Field>>) -> Field {
+pub fn istruct(fields: impl Into<Vec<Field>>) -> Field {
     Field::Inline(Expr::Struct(Struct {
         fields: fields.into(),
     }))
@@ -104,44 +104,48 @@ pub fn add(lhs: Expr, rhs: Expr) -> Expr {
     Expr::Binop(Box::new(lhs), Binop::Add, Box::new(rhs))
 }
 
-pub fn block(stmts: Vec<Stmt>) -> Block {
-    Block { stmts }
-}
-
-pub fn eblock(stmts: Vec<Stmt>) -> Expr {
-    Expr::Block(Block { stmts })
-}
-
-pub fn call(func: Expr, args: Vec<Expr>) -> Call {
-    Call {
-        func: Box::new(func),
-        args,
+pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
+    Block {
+        stmts: stmts.into(),
     }
 }
 
-pub fn ecall(func: Expr, args: Vec<Expr>) -> Expr {
-    Expr::Call(Call {
-        func: Box::new(func),
-        args,
+pub fn eblock(stmts: impl Into<Vec<Stmt>>) -> Expr {
+    Expr::Block(Block {
+        stmts: stmts.into(),
     })
 }
 
-pub fn bind(ident: Ident, expr: Expr) -> Stmt {
+pub fn call(func: Expr, args: impl Into<Vec<Expr>>) -> Call {
+    Call {
+        func: Box::new(func),
+        args: args.into(),
+    }
+}
+
+pub fn ecall(func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
+    Expr::Call(Call {
+        func: Box::new(func),
+        args: args.into(),
+    })
+}
+
+pub fn sbind(ident: Ident, expr: Expr) -> Stmt {
     Stmt::Bind(ident, expr)
 }
 
-pub fn bind_mut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
+pub fn sbindmut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
     Stmt::BindMut(ident, ty, expr)
 }
 
-pub fn write(ident: Ident, expr: Expr) -> Stmt {
+pub fn swrite(ident: Ident, expr: Expr) -> Stmt {
     Stmt::Write(ident, expr)
 }
 
-pub fn add_assn(ident: Ident, expr: Expr) -> Stmt {
+pub fn sadd(ident: Ident, expr: Expr) -> Stmt {
     Stmt::Update(ident, Binop::Add, expr)
 }
 
-pub fn stmt_expr(expr: Expr) -> Stmt {
+pub fn sexpr(expr: Expr) -> Stmt {
     Stmt::Expr(expr)
 }

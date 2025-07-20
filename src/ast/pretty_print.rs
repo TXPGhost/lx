@@ -32,6 +32,11 @@ pub const PUNCT: Color = Color::TrueColor {
     g: 151,
     b: 140,
 };
+pub const GROUP: Color = Color::TrueColor {
+    r: 138,
+    g: 132,
+    b: 122,
+};
 
 #[derive(Clone, Copy, Default)]
 pub struct PrettyPrintContext {
@@ -59,15 +64,26 @@ pub trait PrettyPrint {
 
 impl PrettyPrint for Struct {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        if self.fields.is_empty() {
+            return format!("{}", "()".color(GROUP));
+        }
+        if self.fields.len() == 1 {
+            return format!(
+                "{}{}{}",
+                "(".color(GROUP),
+                self.fields[0].pretty_print(ctxt),
+                ")".color(GROUP)
+            );
+        }
         let mut s = String::new();
-        s += &format!("{}\n", "(".color(PUNCT));
+        s += &format!("{}\n", "(".color(GROUP));
         for field in &self.fields {
             s += &ctxt.indented().indent();
             s += &field.pretty_print(ctxt);
             s += "\n";
         }
         s += &ctxt.indent();
-        s += &format!("{}", ")".color(PUNCT));
+        s += &format!("{}", ")".color(GROUP));
         s
     }
 }
@@ -125,15 +141,26 @@ impl PrettyPrint for Expr {
 
 impl PrettyPrint for Block {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        if self.stmts.is_empty() {
+            return format!("{}", "{}".color(GROUP));
+        }
+        if self.stmts.len() == 1 {
+            return format!(
+                "{} {} {}",
+                "{".color(GROUP),
+                self.stmts[0].pretty_print(ctxt),
+                "}".color(GROUP)
+            );
+        }
         let mut s = String::new();
-        s += &format!("{}\n", "{".color(PUNCT));
+        s += &format!("{}\n", "{".color(GROUP));
         for stmt in &self.stmts {
             s += &ctxt.indented().indent();
             s += &stmt.pretty_print(ctxt);
             s += "\n";
         }
         s += &ctxt.indent();
-        s += &format!("{}", "}".color(PUNCT));
+        s += &format!("{}", "}".color(GROUP));
         s
     }
 }
