@@ -14,12 +14,12 @@ pub struct Colorscheme {
 
 impl Default for Colorscheme {
     fn default() -> Self {
-        Self::DEFAULT
+        Self::SAND
     }
 }
 
 impl Colorscheme {
-    pub const DEFAULT: Self = Self {
+    pub const BASE16: Self = Self {
         normal: Color::White,
         member: Color::Blue,
         type_: Color::Cyan,
@@ -28,6 +28,49 @@ impl Colorscheme {
         operator: Color::BrightBlack,
         punctuation: Color::BrightBlack,
         string: Color::Green,
+    };
+
+    pub const SAND: Self = Self {
+        normal: Color::TrueColor {
+            r: 210,
+            g: 201,
+            b: 187,
+        },
+        member: Color::TrueColor {
+            r: 183,
+            g: 158,
+            b: 117,
+        },
+        type_: Color::TrueColor {
+            r: 198,
+            g: 165,
+            b: 109,
+        },
+        function: Color::TrueColor {
+            r: 209,
+            g: 167,
+            b: 100,
+        },
+        constant: Color::TrueColor {
+            r: 198,
+            g: 70,
+            b: 64,
+        },
+        operator: Color::TrueColor {
+            r: 158,
+            g: 151,
+            b: 140,
+        },
+        punctuation: Color::TrueColor {
+            r: 138,
+            g: 132,
+            b: 122,
+        },
+        string: Color::TrueColor {
+            r: 98,
+            g: 147,
+            b: 187,
+        },
     };
 
     pub const HABA: Self = Self {

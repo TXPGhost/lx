@@ -57,8 +57,11 @@ pub fn eident(ident: Ident) -> Expr {
 }
 
 pub fn vid(name: &'static str) -> Ident {
+    let name: Rc<str> = name.into();
+    assert!(!name.is_empty());
+    assert!(!name.chars().next().unwrap().is_ascii_uppercase());
     Ident {
-        name: name.into(),
+        name,
         is_type: false,
         is_void: false,
         nhoist: 0,
@@ -66,8 +69,11 @@ pub fn vid(name: &'static str) -> Ident {
 }
 
 pub fn tid(name: &'static str) -> Ident {
+    let name: Rc<str> = name.into();
+    assert!(!name.is_empty());
+    assert!(!name.chars().next().unwrap().is_ascii_lowercase());
     Ident {
-        name: name.into(),
+        name,
         is_type: true,
         is_void: false,
         nhoist: 0,

@@ -151,7 +151,7 @@ fn main() {
         ),
         fspacer(),
         field(
-            tid("main"),
+            vid("main"),
             efunc(
                 args([arg_mut(vid("io"), etid("IO"))]),
                 eblock([
