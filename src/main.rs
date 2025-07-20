@@ -18,7 +18,14 @@ fn main() {
                 fspacer(),
                 field(
                     vid("zero"),
-                    ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(0)]),
+                    econstructor(
+                        tid("Vector3"),
+                        [
+                            field(vid("x"), ei32(0)),
+                            field(vid("y"), ei32(0)),
+                            field(vid("z"), ei32(0)),
+                        ],
+                    ),
                 ),
                 fspacer(),
                 field(
