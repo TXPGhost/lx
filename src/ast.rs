@@ -45,6 +45,26 @@ pub enum Binop {
     Add,
 }
 
+pub fn expr_struct(fields: impl Into<Vec<Field>>) -> Expr {
+    Expr::Struct(Struct {
+        fields: fields.into(),
+    })
+}
+
+pub fn inline_struct(fields: impl Into<Vec<Field>>) -> Field {
+    Field::Inline(Expr::Struct(Struct {
+        fields: fields.into(),
+    }))
+}
+
+pub fn field(ident: Ident, expr: Expr) -> Field {
+    Field::Field(ident, expr)
+}
+
+pub fn inline(struct_: Struct) -> Field {
+    Field::Inline(Expr::Struct(struct_))
+}
+
 pub fn vid(name: &'static str) -> Ident {
     Ident {
         name: name.into(),
@@ -57,4 +77,20 @@ pub fn tid(name: &'static str) -> Ident {
         name: name.into(),
         is_type: true,
     }
+}
+
+pub fn evid(name: &'static str) -> Expr {
+    Expr::Ident(vid(name))
+}
+
+pub fn etid(name: &'static str) -> Expr {
+    Expr::Ident(tid(name))
+}
+
+pub fn ei32(n: i32) -> Expr {
+    Expr::I32(n)
+}
+
+pub fn add(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Add, Box::new(rhs))
 }

@@ -1,4 +1,4 @@
-use crate::ast;
+use crate::ast::{self, Binop};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,6 +20,7 @@ pub enum Expr {
     I32(i32),
     Struct(Rc<RefCell<Struct>>),
     Block(Block),
+    Call(Call),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -28,15 +29,16 @@ pub struct Block {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Call {
+    pub func: Box<Expr>,
+    pub args: Vec<Expr>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Stmt {
     Bind(Ident, Expr),
     BindMut(Ident, Expr, Expr),
     Expr(Expr),
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Binop {
-    Add,
 }
 
 impl Struct {
@@ -139,8 +141,35 @@ impl IntoIr for ast::Expr {
             ast::Expr::Ident(ident) => Ok(Expr::Ident(ident.into_ir(ctxt.clone())?)),
             ast::Expr::I32(n) => Ok(Expr::I32(n)),
             ast::Expr::Struct(struct_) => Ok(Expr::Struct(struct_.into_ir(ctxt.clone())?)),
-            ast::Expr::Block(block) => todo!(),
-            ast::Expr::Binop(expr, binop, expr1) => todo!(),
+            ast::Expr::Block(block) => Ok(Expr::Block(block.into_ir(ctxt.clone())?)),
+            ast::Expr::Binop(lhs, binop, rhs) => Ok(Expr::Call(Call {
+                func: Box::new(Expr::Ident(Ident::Binop(binop))),
+                args: vec![lhs.into_ir(ctxt.clone())?, rhs.into_ir(ctxt.clone())?],
+            })),
         }
+    }
+}
+
+impl IntoIr for ast::Block {
+    type Ir = Block;
+
+    fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
+        let mut stmts = Vec::new();
+        for stmt in self.stmts {
+            stmts.push(match stmt {
+                ast::Stmt::Bind(ident, expr) => {
+                    Stmt::Bind(ident.into_ir(ctxt.clone())?, expr.into_ir(ctxt.clone())?)
+                }
+                ast::Stmt::BindMut(ident, ty, expr) => Stmt::BindMut(
+                    ident.into_ir(ctxt.clone())?,
+                    ty.into_ir(ctxt.clone())?,
+                    expr.into_ir(ctxt.clone())?,
+                ),
+                ast::Stmt::Write(ident, expr) => todo!(),
+                ast::Stmt::Update(ident, binop, expr) => todo!(),
+                ast::Stmt::Expr(expr) => Stmt::Expr(expr.into_ir(ctxt.clone())?),
+            })
+        }
+        Ok(Block { stmts })
     }
 }
