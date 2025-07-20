@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use colored::Color;
 
 #[derive(Clone, Copy, Debug)]
@@ -19,6 +21,15 @@ impl Default for Colorscheme {
 }
 
 impl Colorscheme {
+    pub fn colorschemes() -> HashMap<String, Colorscheme> {
+        HashMap::from([
+            ("base16".into(), Self::BASE16),
+            ("sand".into(), Self::SAND),
+            ("ocean".into(), Self::OCEAN),
+            ("evil".into(), Self::EVIL),
+        ])
+    }
+
     pub const BASE16: Self = Self {
         normal: Color::White,
         member: Color::Blue,
@@ -73,7 +84,7 @@ impl Colorscheme {
         },
     };
 
-    pub const HABA: Self = Self {
+    pub const OCEAN: Self = Self {
         normal: Color::TrueColor {
             r: 210,
             g: 201,
@@ -113,6 +124,49 @@ impl Colorscheme {
             r: 175,
             g: 175,
             b: 135,
+        },
+    };
+
+    pub const EVIL: Self = Self {
+        normal: Color::TrueColor {
+            r: 255,
+            g: 255,
+            b: 255,
+        },
+        member: Color::TrueColor {
+            r: 150,
+            g: 150,
+            b: 150,
+        },
+        type_: Color::TrueColor {
+            r: 180,
+            g: 180,
+            b: 180,
+        },
+        function: Color::TrueColor {
+            r: 220,
+            g: 220,
+            b: 220,
+        },
+        constant: Color::TrueColor {
+            r: 198,
+            g: 70,
+            b: 64,
+        },
+        operator: Color::TrueColor {
+            r: 150,
+            g: 150,
+            b: 150,
+        },
+        punctuation: Color::TrueColor {
+            r: 120,
+            g: 120,
+            b: 120,
+        },
+        string: Color::TrueColor {
+            r: 180,
+            g: 180,
+            b: 180,
         },
     };
 }
