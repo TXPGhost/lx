@@ -2,10 +2,25 @@ use colored::{Color, Colorize};
 
 use super::*;
 
-pub const MEMBER: Color = Color::TrueColor {
+pub const NORMAL: Color = Color::TrueColor {
+    r: 210,
+    g: 201,
+    b: 187,
+};
+pub const TYPE: Color = Color::TrueColor {
     r: 209,
     g: 175,
     b: 121,
+};
+pub const MEMBER: Color = Color::TrueColor {
+    r: 209,
+    g: 183,
+    b: 142,
+};
+pub const FUNC: Color = Color::TrueColor {
+    r: 209,
+    g: 167,
+    b: 100,
 };
 pub const CONST: Color = Color::TrueColor {
     r: 198,
@@ -63,7 +78,11 @@ impl PrettyPrint for Field {
             Field::Field(ident, expr) => {
                 format!(
                     "{} {}",
-                    ident.pretty_print(ctxt).color(MEMBER),
+                    if ident.is_type {
+                        format!("{}", ident.name.bold().color(TYPE))
+                    } else {
+                        format!("{}", ident.name.color(MEMBER))
+                    },
                     expr.pretty_print(ctxt.indented())
                 )
             }
@@ -79,9 +98,9 @@ impl PrettyPrint for Field {
 impl PrettyPrint for Ident {
     fn pretty_print(&self, _: PrettyPrintContext) -> String {
         if self.is_type {
-            format!("{}", self.name.as_ref().bold())
+            format!("{}", self.name.as_ref().bold().color(TYPE))
         } else {
-            self.name.as_ref().to_owned()
+            format!("{}", self.name.as_ref().color(NORMAL))
         }
     }
 }
@@ -99,6 +118,7 @@ impl PrettyPrint for Expr {
                 op.pretty_print(ctxt),
                 rhs.pretty_print(ctxt)
             ),
+            Expr::Call(call) => call.pretty_print(ctxt),
         }
     }
 }
@@ -161,5 +181,24 @@ impl PrettyPrint for Stmt {
             ),
             Stmt::Expr(expr) => expr.pretty_print(ctxt).to_string(),
         }
+    }
+}
+
+impl PrettyPrint for Call {
+    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        let mut s = String::new();
+        match &*self.func {
+            Expr::Ident(ident) => s += &format!("{}", ident.name.color(FUNC)),
+            _ => s += &self.func.pretty_print(ctxt),
+        }
+        s += &format!("{}", "(".color(PUNCT));
+        for i in 0..self.args.len() {
+            s += &self.args[i].pretty_print(ctxt);
+            if i < self.args.len() - 1 {
+                s += &format!("{}", ", ".color(PUNCT));
+            }
+        }
+        s += &format!("{}", ")".color(PUNCT));
+        s
     }
 }

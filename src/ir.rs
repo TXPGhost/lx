@@ -146,6 +146,16 @@ impl IntoIr for ast::Expr {
                 func: Box::new(Expr::Ident(Ident::Binop(binop))),
                 args: vec![lhs.into_ir(ctxt.clone())?, rhs.into_ir(ctxt.clone())?],
             })),
+            ast::Expr::Call(call) => Ok(Expr::Call(Call {
+                func: Box::new(call.func.into_ir(ctxt.clone())?),
+                args: {
+                    let mut args = Vec::new();
+                    for arg in call.args {
+                        args.push(arg.into_ir(ctxt.clone())?);
+                    }
+                    args
+                },
+            })),
         }
     }
 }

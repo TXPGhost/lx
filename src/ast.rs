@@ -26,6 +26,13 @@ pub enum Expr {
     Struct(Struct),
     Block(Block),
     Binop(Box<Expr>, Binop, Box<Expr>),
+    Call(Call),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Call {
+    pub func: Box<Expr>,
+    pub args: Vec<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -47,7 +54,7 @@ pub enum Binop {
     Add,
 }
 
-pub fn expr_struct(fields: impl Into<Vec<Field>>) -> Expr {
+pub fn estruct(fields: impl Into<Vec<Field>>) -> Expr {
     Expr::Struct(Struct {
         fields: fields.into(),
     })
@@ -101,8 +108,22 @@ pub fn block(stmts: Vec<Stmt>) -> Block {
     Block { stmts }
 }
 
-pub fn expr_block(stmts: Vec<Stmt>) -> Expr {
+pub fn eblock(stmts: Vec<Stmt>) -> Expr {
     Expr::Block(Block { stmts })
+}
+
+pub fn call(func: Expr, args: Vec<Expr>) -> Call {
+    Call {
+        func: Box::new(func),
+        args,
+    }
+}
+
+pub fn ecall(func: Expr, args: Vec<Expr>) -> Expr {
+    Expr::Call(Call {
+        func: Box::new(func),
+        args,
+    })
 }
 
 pub fn bind(ident: Ident, expr: Expr) -> Stmt {
