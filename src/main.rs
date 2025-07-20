@@ -1,8 +1,9 @@
 pub mod ast;
+pub mod eval;
 pub mod ir;
 
 use ast::*;
-use ir::IntoIr;
+// use ir::IntoIr;
 
 use crate::ast::pretty_print::PrettyPrint;
 
@@ -33,7 +34,7 @@ fn main() {
 
     println!("{}", ast.pretty_print_string());
 
-    let ir = ast.into_ir(None).unwrap();
+    // let ir = ast.into_ir(None).unwrap();
 
     // dbg!(&ir);
 }

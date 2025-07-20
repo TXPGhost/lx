@@ -165,8 +165,8 @@ impl IntoIr for ast::Block {
                     ty.into_ir(ctxt.clone())?,
                     expr.into_ir(ctxt.clone())?,
                 ),
-                ast::Stmt::Write(ident, expr) => todo!(),
-                ast::Stmt::Update(ident, binop, expr) => todo!(),
+                ast::Stmt::Write(_, _) => todo!(),
+                ast::Stmt::Update(_, _, _) => todo!(),
                 ast::Stmt::Expr(expr) => Stmt::Expr(expr.into_ir(ctxt.clone())?),
             })
         }
