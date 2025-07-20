@@ -136,7 +136,7 @@ pub trait PrettyPrint {
 impl PrettyPrint for Struct {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.fields.is_empty() {
-            return ctxt.color("{}", PUNCTUATION);
+            return ctxt.color("()", PUNCTUATION);
         }
         if self.fields.len() == 1 {
             if let Field::Inline(expr) | Field::Field(_, expr) = &self.fields[0] {
