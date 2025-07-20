@@ -45,24 +45,10 @@ pub const STRING: Color = Color::TrueColor {
     b: 135,
 };
 
-impl Binop {
-    pub const fn include_space(self) -> bool {
-        match self {
-            Binop::Add => true,
-            Binop::Sub => true,
-            Binop::Mul => true,
-            Binop::Div => true,
-            Binop::Pow => false,
-            Binop::Concat => false,
-        }
-    }
-}
-
 #[derive(Clone, Default)]
 pub struct PrettyPrintContext<'parent> {
     pub indent_level: usize,
     pub argumets: Cow<'parent, HashSet<String>>,
-    pub is_call: bool,
 }
 
 impl<'parent> PrettyPrintContext<'parent> {
@@ -87,13 +73,6 @@ impl<'parent> PrettyPrintContext<'parent> {
 
     pub fn is_argument(&self, argument: &str) -> bool {
         self.argumets.contains(argument)
-    }
-
-    pub fn as_call(&self, is_call: bool) -> Self {
-        Self {
-            is_call,
-            ..self.clone()
-        }
     }
 }
 
@@ -247,11 +226,9 @@ impl PrettyPrint for Expr {
             Expr::Struct(struct_) => struct_.pretty_print(ctxt),
             Expr::Block(block) => block.pretty_print(ctxt),
             Expr::Binop(lhs, op, rhs) => format!(
-                "{}{}{}{}{}",
+                "{} {} {}",
                 lhs.pretty_print(ctxt),
-                if op.include_space() { " " } else { "" },
                 op.pretty_print(ctxt),
-                if op.include_space() { " " } else { "" },
                 rhs.pretty_print(ctxt)
             ),
             Expr::Func(func) => func.pretty_print(ctxt),
@@ -402,19 +379,32 @@ impl PrettyPrint for Call {
             s += &format!("{}", ":".color(PUNCTUATION));
         }
         let mut angle_brackets = false;
-        match &*self.func {
-            Expr::Ident(ident) => {
-                s += &format!(
-                    "{}",
-                    if ident.is_type {
-                        angle_brackets = true;
-                        ident.name.bold().color(TYPE)
-                    } else {
-                        ident.name.color(FUNCTION)
-                    }
-                )
+        let mut func = self.func.as_ref().clone();
+        loop {
+            match func {
+                Expr::Ident(ident) => {
+                    s += &format!(
+                        "{}",
+                        if ident.is_type {
+                            angle_brackets = true;
+                            ident.name.bold().color(TYPE)
+                        } else {
+                            ident.name.color(FUNCTION)
+                        }
+                    );
+                    break;
+                }
+                Expr::Project(Project { expr, field }) => {
+                    s += &expr.pretty_print(ctxt).to_string();
+                    s += &format!("{}", ".".color(PUNCTUATION));
+                    func = Expr::Ident(field.clone());
+                    continue;
+                }
+                _ => {
+                    s += &self.func.pretty_print(ctxt);
+                    break;
+                }
             }
-            _ => s += &self.func.pretty_print(ctxt),
         }
         s += &format!(
             "{}",
