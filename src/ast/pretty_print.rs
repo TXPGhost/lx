@@ -134,7 +134,7 @@ impl PrettyPrint for Field {
             }
             Field::Inline(expr) => format!(
                 "{}{}",
-                "..".color(OPERATOR),
+                "..".color(PUNCTUATION),
                 expr.pretty_print(ctxt.indented())
             ),
             Field::Spacer => "".to_string(),
