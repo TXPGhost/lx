@@ -4,6 +4,8 @@ pub mod ir;
 use ast::*;
 use ir::IntoIr;
 
+use crate::ast::pretty_print::PrettyPrint;
+
 fn main() {
     let ast = expr_struct(vec![
         field(vid("a"), ei32(1)),
@@ -19,11 +21,19 @@ fn main() {
         ),
         inline_struct(vec![field(vid("d"), ei32(4)), field(vid("e"), ei32(5))]),
         field(vid("ans"), add(evid("a"), evid("b"))),
+        field(
+            vid("block_example"),
+            expr_block(vec![
+                bind(vid("x"), ei32(42)),
+                bind(vid("x"), ei32(42)),
+                bind(vid("x"), ei32(42)),
+            ]),
+        ),
     ]);
 
-    dbg!(&ast);
+    println!("{}", ast.pretty_print_string());
 
     let ir = ast.into_ir(None).unwrap();
 
-    dbg!(&ir);
+    // dbg!(&ir);
 }

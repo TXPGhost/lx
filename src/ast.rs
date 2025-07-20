@@ -1,3 +1,5 @@
+pub mod pretty_print;
+
 use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,8 +37,8 @@ pub struct Block {
 pub enum Stmt {
     Bind(Ident, Expr),
     BindMut(Ident, Expr, Expr),
-    Write(Ident, Box<Expr>),
-    Update(Ident, Binop, Box<Expr>),
+    Write(Ident, Expr),
+    Update(Ident, Binop, Expr),
     Expr(Expr),
 }
 
@@ -93,4 +95,32 @@ pub fn ei32(n: i32) -> Expr {
 
 pub fn add(lhs: Expr, rhs: Expr) -> Expr {
     Expr::Binop(Box::new(lhs), Binop::Add, Box::new(rhs))
+}
+
+pub fn block(stmts: Vec<Stmt>) -> Block {
+    Block { stmts }
+}
+
+pub fn expr_block(stmts: Vec<Stmt>) -> Expr {
+    Expr::Block(Block { stmts })
+}
+
+pub fn bind(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Bind(ident, expr)
+}
+
+pub fn bind_mut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
+    Stmt::BindMut(ident, ty, expr)
+}
+
+pub fn write(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Write(ident, expr)
+}
+
+pub fn add_assn(ident: Ident, expr: Expr) -> Stmt {
+    Stmt::Update(ident, Binop::Add, expr)
+}
+
+pub fn stmt_expr(expr: Expr) -> Stmt {
+    Stmt::Expr(expr)
 }
