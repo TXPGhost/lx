@@ -25,8 +25,8 @@ fn main() {
             vid("block_example"),
             expr_block(vec![
                 bind(vid("x"), ei32(42)),
-                bind(vid("x"), ei32(42)),
-                bind(vid("x"), ei32(42)),
+                bind(vid("y"), ei32(24)),
+                bind(vid("z"), add(evid("x"), evid("y"))),
             ]),
         ),
     ]);
