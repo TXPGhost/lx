@@ -24,6 +24,13 @@ pub enum Expr {
     Struct(Rc<RefCell<Struct>>),
     Block(Block),
     Call(Call),
+    Project(Project),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Project {
+    pub expr: Box<Expr>,
+    pub field: Ident,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -116,6 +123,7 @@ impl IntoIr for ast::Struct {
                         }
                     }
                 }
+                ast::Field::Spacer => {}
             }
         }
         Ok(Rc::new(RefCell::new(Struct {
@@ -158,6 +166,10 @@ impl IntoIr for ast::Expr {
                     }
                     args
                 },
+            })),
+            ast::Expr::Project(project) => Ok(Expr::Project(Project {
+                expr: Box::new(project.expr.into_ir(ctxt.clone())?),
+                field: project.field.into_ir(ctxt)?,
             })),
         }
     }

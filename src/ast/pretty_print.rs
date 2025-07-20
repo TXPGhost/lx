@@ -7,15 +7,20 @@ pub const NORMAL: Color = Color::TrueColor {
     g: 201,
     b: 187,
 };
-pub const TYPE: Color = Color::TrueColor {
-    r: 209,
-    g: 175,
-    b: 121,
-};
 pub const MEMBER: Color = Color::TrueColor {
+    r: 191,
+    g: 164,
+    b: 122,
+};
+pub const TYPE: Color = Color::TrueColor {
     r: 209,
     g: 183,
     b: 142,
+};
+pub const TYPE_MEMBER: Color = Color::TrueColor {
+    r: 196,
+    g: 172,
+    b: 133,
 };
 pub const FUNC: Color = Color::TrueColor {
     r: 209,
@@ -100,7 +105,7 @@ impl PrettyPrint for Field {
                 format!(
                     "{} {}",
                     if ident.is_type {
-                        format!("{}", ident.name.bold().color(TYPE))
+                        format!("{}", ident.name.bold().color(TYPE_MEMBER))
                     } else {
                         format!("{}", ident.name.color(MEMBER))
                     },
@@ -112,6 +117,7 @@ impl PrettyPrint for Field {
                 "..".color(PUNCT),
                 expr.pretty_print(ctxt.indented())
             ),
+            Field::Spacer => "".to_string(),
         }
     }
 }
@@ -146,6 +152,7 @@ impl PrettyPrint for Expr {
                 rhs.pretty_print(ctxt)
             ),
             Expr::Call(call) => call.pretty_print(ctxt),
+            Expr::Project(project) => project.pretty_print(ctxt),
         }
     }
 }
@@ -238,5 +245,20 @@ impl PrettyPrint for Call {
         }
         s += &format!("{}", ")".color(PUNCT));
         s
+    }
+}
+
+impl PrettyPrint for Project {
+    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        format!(
+            "{}{}{}",
+            self.expr.pretty_print(ctxt),
+            ".".color(PUNCT),
+            if self.field.is_type {
+                self.field.name.bold().color(TYPE)
+            } else {
+                self.field.name.color(NORMAL)
+            }
+        )
     }
 }

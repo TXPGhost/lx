@@ -9,9 +9,12 @@ use crate::ast::pretty_print::PrettyPrint;
 
 fn main() {
     let ast = estruct([
-        field(vid("a"), ei32(1)),
-        field(vid("b"), ei32(2)),
-        field(vid("c"), ei32(3)),
+        inline(evid("std")),
+        fspacer(),
+        field(vid("first"), ei32(1)),
+        field(vid("second"), ei32(2)),
+        field(vid("third"), ei32(3)),
+        fspacer(),
         field(
             tid("Vector3"),
             estruct([
@@ -20,7 +23,9 @@ fn main() {
                 field(vid("z"), etid("I32")),
             ]),
         ),
+        fspacer(),
         istruct([field(vid("d"), ei32(4)), field(vid("e"), ei32(5))]),
+        fspacer(),
         field(vid("ans"), add(evid("a"), evid("b"))),
         field(
             vid("block_example"),
@@ -32,18 +37,32 @@ fn main() {
                 sexpr(evid("z")),
             ]),
         ),
+        fspacer(),
         field(
             vid("result"),
             ecall(evid("get_value"), [ei32(1), ei32(2), evid("w")]),
         ),
+        fspacer(),
         field(vid("empty_block"), eblock([])),
+        fspacer(),
         field(vid("unit_block"), eblock([sexpr(ecall(evid("func"), []))])),
         field(vid("unit"), estruct([])),
+        fspacer(),
         field(
             vid("single"),
             estruct([field(vid("value"), etid("String"))]),
         ),
-        field(vid("msg"), estring("Hello, world!")),
+        fspacer(),
+        field(vid("projection"), eproject(evid("struct"), vid("field"))),
+        field(vid("TypeProj"), eproject(evid("struct"), tid("Type"))),
+        fspacer(),
+        field(
+            vid("main"),
+            eblock([
+                sbind(vid("msg"), estring("Hello, world!")),
+                sexpr(ecall(evid("print"), [evid("msg")])),
+            ]),
+        ),
     ]);
 
     println!("{}", ast.pretty_print_string());

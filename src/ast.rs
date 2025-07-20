@@ -13,6 +13,7 @@ pub struct Struct {
 pub enum Field {
     Field(Ident, Expr),
     Inline(Expr),
+    Spacer,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -29,6 +30,13 @@ pub enum Expr {
     Block(Block),
     Binop(Box<Expr>, Binop, Box<Expr>),
     Call(Call),
+    Project(Project),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Project {
+    pub expr: Box<Expr>,
+    pub field: Ident,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -76,8 +84,12 @@ pub fn field(ident: Ident, expr: Expr) -> Field {
     Field::Field(ident, expr)
 }
 
-pub fn inline(struct_: Struct) -> Field {
-    Field::Inline(Expr::Struct(struct_))
+pub fn fspacer() -> Field {
+    Field::Spacer
+}
+
+pub fn inline(expr: Expr) -> Field {
+    Field::Inline(expr)
 }
 
 pub fn vid(name: &'static str) -> Ident {
@@ -119,6 +131,13 @@ pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
 pub fn eblock(stmts: impl Into<Vec<Stmt>>) -> Expr {
     Expr::Block(Block {
         stmts: stmts.into(),
+    })
+}
+
+pub fn eproject(expr: Expr, field: Ident) -> Expr {
+    Expr::Project(Project {
+        expr: Box::new(expr),
+        field,
     })
 }
 
