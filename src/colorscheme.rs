@@ -16,7 +16,7 @@ pub struct Colorscheme {
 
 impl Default for Colorscheme {
     fn default() -> Self {
-        Self::SAND
+        Self::PASTEL
     }
 }
 
@@ -27,6 +27,7 @@ impl Colorscheme {
             ("sand".into(), Self::SAND),
             ("ocean".into(), Self::OCEAN),
             ("evil".into(), Self::EVIL),
+            ("pastel".into(), Self::PASTEL),
         ])
     }
 
@@ -167,6 +168,49 @@ impl Colorscheme {
             r: 180,
             g: 180,
             b: 180,
+        },
+    };
+
+    pub const PASTEL: Self = Self {
+        normal: Color::TrueColor {
+            r: 209,
+            g: 203,
+            b: 194,
+        },
+        member: Color::TrueColor {
+            r: 163,
+            g: 185,
+            b: 206,
+        },
+        type_: Color::TrueColor {
+            r: 158,
+            g: 206,
+            b: 211,
+        },
+        function: Color::TrueColor {
+            r: 102,
+            g: 155,
+            b: 188,
+        },
+        constant: Color::TrueColor {
+            r: 229,
+            g: 91,
+            b: 103,
+        },
+        operator: Color::TrueColor {
+            r: 150,
+            g: 150,
+            b: 150,
+        },
+        punctuation: Color::TrueColor {
+            r: 120,
+            g: 120,
+            b: 120,
+        },
+        string: Color::TrueColor {
+            r: 216,
+            g: 161,
+            b: 71,
         },
     };
 }
