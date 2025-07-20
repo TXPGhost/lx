@@ -63,12 +63,17 @@ fn main() {
         field(vid("projection"), eproject(evid("struct"), vid("field"))),
         field(tid("TypeProj"), eproject(evid("struct"), tid("Type"))),
         fspacer(),
+        field(vid("main"), efunc(args([aident(tid("Int"))]), etid("Int"))),
+        fspacer(),
         field(
             vid("main"),
-            eblock([
-                sbind(vid("msg"), estring("Hello, world!")),
-                sexpr(ecall(evid("print"), [evid("msg")])),
-            ]),
+            efunc(
+                args([arg(vid("io"), etid("IO"))]),
+                eblock([
+                    sbind(vid("msg"), estring("Hello, world!")),
+                    sexpr(ecall(evid("print"), [evid("msg")])),
+                ]),
+            ),
         ),
     ]);
 

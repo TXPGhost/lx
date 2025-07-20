@@ -93,16 +93,41 @@ impl PrettyPrint for Struct {
     }
 }
 
+impl PrettyPrint for Args {
+    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        if self.args.is_empty() {
+            return format!("{}", "()".color(GROUP));
+        }
+        if self.args.len() == 1 {
+            return format!(
+                "{}{}{}",
+                "(".color(GROUP),
+                self.args[0].pretty_print(ctxt),
+                ")".color(GROUP)
+            );
+        }
+        let mut s = String::new();
+        s += &format!("{}\n", "(".color(GROUP));
+        for field in &self.args {
+            s += &ctxt.indented().indent();
+            s += &field.pretty_print(ctxt);
+            s += "\n";
+        }
+        s += &ctxt.indent();
+        s += &format!("{}", ")".color(GROUP));
+        s
+    }
+}
+
 impl PrettyPrint for Field {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         match self {
             Field::Field(ident, expr) => {
                 format!(
                     "{} {}",
-                    if ident.is_type {
-                        format!("{}", ident.name.bold().color(MEMBER))
-                    } else {
-                        format!("{}", ident.name.color(MEMBER))
+                    match ident.is_type {
+                        true => ident.name.bold().color(MEMBER),
+                        false => ident.name.color(MEMBER),
                     },
                     expr.pretty_print(ctxt.indented())
                 )
@@ -113,6 +138,32 @@ impl PrettyPrint for Field {
                 expr.pretty_print(ctxt.indented())
             ),
             Field::Spacer => "".to_string(),
+        }
+    }
+}
+
+impl PrettyPrint for Arg {
+    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        match self {
+            Arg::Named(ident, expr) => {
+                format!(
+                    "{} {}",
+                    match ident.is_type {
+                        true => ident.name.italic().bold().color(NORMAL),
+                        false => ident.name.italic().color(NORMAL),
+                    },
+                    expr.pretty_print(ctxt.indented())
+                )
+            }
+            Arg::Ident(ident) => {
+                format!(
+                    "{}",
+                    match ident.is_type {
+                        true => ident.name.bold().color(TYPE),
+                        false => ident.name.italic().color(NORMAL),
+                    },
+                )
+            }
         }
     }
 }
@@ -140,6 +191,7 @@ impl PrettyPrint for Expr {
                 op.pretty_print(ctxt),
                 rhs.pretty_print(ctxt)
             ),
+            Expr::Func(func) => func.pretty_print(ctxt),
             Expr::Call(call) => call.pretty_print(ctxt),
             Expr::Project(project) => project.pretty_print(ctxt),
         }
@@ -248,6 +300,16 @@ impl PrettyPrint for Stmt {
             ),
             Stmt::Expr(expr) => expr.pretty_print(ctxt).to_string(),
         }
+    }
+}
+
+impl PrettyPrint for Func {
+    fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
+        format!(
+            "{} {}",
+            self.args.pretty_print(ctxt),
+            self.body.pretty_print(ctxt)
+        )
     }
 }
 

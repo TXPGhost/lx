@@ -10,16 +10,28 @@ pub struct Struct {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Args {
+    pub args: Vec<Arg>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Field {
     Field(Ident, Expr),
     Inline(Expr),
     Spacer,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Arg {
+    Named(Ident, Expr),
+    Ident(Ident),
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ident {
     pub name: Rc<str>,
     pub is_type: bool,
+    pub is_void: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -29,6 +41,7 @@ pub enum Expr {
     Struct(Struct),
     Block(Block),
     Binop(Box<Expr>, Binop, Box<Expr>),
+    Func(Func),
     Call(Call),
     Project(Project),
 }
@@ -37,6 +50,12 @@ pub enum Expr {
 pub struct Project {
     pub expr: Box<Expr>,
     pub field: Ident,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Func {
+    pub args: Args,
+    pub body: Box<Expr>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -64,6 +83,10 @@ pub enum Binop {
     Add,
 }
 
+pub fn args(args: impl Into<Vec<Arg>>) -> Args {
+    Args { args: args.into() }
+}
+
 pub fn estruct(fields: impl Into<Vec<Field>>) -> Expr {
     Expr::Struct(Struct {
         fields: fields.into(),
@@ -88,6 +111,14 @@ pub fn field(ident: Ident, expr: Expr) -> Field {
     Field::Field(ident, expr)
 }
 
+pub fn arg(ident: Ident, expr: Expr) -> Arg {
+    Arg::Named(ident, expr)
+}
+
+pub fn aident(ident: Ident) -> Arg {
+    Arg::Ident(ident)
+}
+
 pub fn fspacer() -> Field {
     Field::Spacer
 }
@@ -100,6 +131,7 @@ pub fn vid(name: &'static str) -> Ident {
     Ident {
         name: name.into(),
         is_type: false,
+        is_void: false,
     }
 }
 
@@ -107,6 +139,15 @@ pub fn tid(name: &'static str) -> Ident {
     Ident {
         name: name.into(),
         is_type: true,
+        is_void: false,
+    }
+}
+
+pub fn void() -> Ident {
+    Ident {
+        name: "_".into(),
+        is_type: false,
+        is_void: true,
     }
 }
 
@@ -135,6 +176,13 @@ pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
 pub fn eblock(stmts: impl Into<Vec<Stmt>>) -> Expr {
     Expr::Block(Block {
         stmts: stmts.into(),
+    })
+}
+
+pub fn efunc(args: Args, body: Expr) -> Expr {
+    Expr::Func(Func {
+        args,
+        body: Box::new(body),
     })
 }
 

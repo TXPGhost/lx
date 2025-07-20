@@ -5,9 +5,21 @@ use crate::{
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Ctxt {
+    Struct(Rc<RefCell<Struct>>),
+    Args(Rc<RefCell<Args>>),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
     pub fields: HashMap<Ident, Expr>,
-    pub parent: Option<Rc<RefCell<Struct>>>,
+    pub parent: Option<Ctxt>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Args {
+    pub args: HashMap<Ident, Expr>,
+    pub parent: Option<Ctxt>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -15,6 +27,7 @@ pub enum Ident {
     VIdent(Rc<str>),
     TIdent(Rc<str>),
     Binop(Binop),
+    Void,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,6 +36,7 @@ pub enum Expr {
     Value(Value),
     Struct(Rc<RefCell<Struct>>),
     Block(Block),
+    Func(Func),
     Call(Call),
     Project(Project),
 }
@@ -39,6 +53,12 @@ pub struct Block {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Func {
+    pub args: Rc<RefCell<Args>>,
+    pub body: Box<Expr>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Call {
     pub func: Box<Expr>,
     pub args: Vec<Expr>,
@@ -51,20 +71,29 @@ pub enum Stmt {
     Expr(Expr),
 }
 
-impl Struct {
+impl Ctxt {
     pub fn lookup(&self, ident: Ident) -> Option<Expr> {
-        match self.fields.get(&ident) {
-            Some(expr) => Some(expr.clone()),
-            None => match &self.parent {
-                Some(parent) => parent.borrow().lookup(ident).clone(),
-                None => None,
+        match self {
+            Ctxt::Struct(struct_) => match struct_.borrow().fields.get(&ident) {
+                Some(expr) => Some(expr.clone()),
+                None => match &struct_.borrow().parent {
+                    Some(parent) => parent.lookup(ident).clone(),
+                    None => None,
+                },
+            },
+            Ctxt::Args(args) => match args.borrow().args.get(&ident) {
+                Some(expr) => Some(expr.clone()),
+                None => match &args.borrow().parent {
+                    Some(parent) => parent.lookup(ident).clone(),
+                    None => None,
+                },
             },
         }
     }
 
-    pub fn lookup_opt(opt: Option<Rc<RefCell<Struct>>>, ident: Ident) -> Option<Expr> {
+    pub fn lookup_opt(opt: Option<Ctxt>, ident: Ident) -> Option<Expr> {
         match opt {
-            Some(parent) => parent.borrow().lookup(ident).clone(),
+            Some(ctxt) => ctxt.lookup(ident).clone(),
             None => None,
         }
     }
@@ -75,19 +104,20 @@ impl Ident {
         match self {
             Ident::VIdent(ident) | Ident::TIdent(ident) => ident.as_ref(),
             Ident::Binop(Binop::Add) => "(+)",
+            Ident::Void => "_",
         }
     }
 }
 
 pub trait IntoIr {
     type Ir;
-    fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String>;
+    fn into_ir(self, ctxt: Option<Ctxt>) -> Result<Self::Ir, String>;
 }
 
 impl IntoIr for ast::Struct {
     type Ir = Rc<RefCell<Struct>>;
 
-    fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
+    fn into_ir(self, ctxt: Option<Ctxt>) -> Result<Self::Ir, String> {
         let mut fields = HashMap::new();
         for field in self.fields {
             match field {
@@ -104,8 +134,7 @@ impl IntoIr for ast::Struct {
                     let struct_ = match expr {
                         ast::Expr::Ident(ident) => {
                             let name = ident.name.clone();
-                            let expr =
-                                Struct::lookup_opt(ctxt.clone(), ident.into_ir(ctxt.clone())?);
+                            let expr = Ctxt::lookup_opt(ctxt.clone(), ident.into_ir(ctxt.clone())?);
                             match expr {
                                 Some(Expr::Struct(struct_)) => return Ok(struct_),
                                 Some(_) => return Err("illegal inline expr".to_string()),
@@ -128,15 +157,44 @@ impl IntoIr for ast::Struct {
         }
         Ok(Rc::new(RefCell::new(Struct {
             fields,
-            parent: ctxt.clone(),
+            parent: ctxt,
         })))
+    }
+}
+
+impl IntoIr for ast::Args {
+    type Ir = Rc<RefCell<Args>>;
+
+    fn into_ir(self, ctxt: Option<Ctxt>) -> Result<Self::Ir, String> {
+        let mut args = HashMap::new();
+        for arg in self.args {
+            match arg {
+                ast::Arg::Named(ident, expr) => {
+                    let name = ident.name.clone();
+                    if args
+                        .insert(ident.into_ir(ctxt.clone())?, expr.into_ir(ctxt.clone())?)
+                        .is_some()
+                    {
+                        return Err(format!("duplicate argument {name}"));
+                    }
+                }
+                ast::Arg::Ident(ident) => {
+                    if ident.is_type {
+                        args.insert(Ident::Void, Expr::Ident(ident.into_ir(ctxt.clone())?));
+                    } else {
+                        panic!("not yet implemented")
+                    }
+                }
+            }
+        }
+        Ok(Rc::new(RefCell::new(Args { args, parent: ctxt })))
     }
 }
 
 impl IntoIr for ast::Ident {
     type Ir = Ident;
 
-    fn into_ir(self, _: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
+    fn into_ir(self, _: Option<Ctxt>) -> Result<Self::Ir, String> {
         match self.is_type {
             true => Ok(Ident::TIdent(self.name)),
             false => Ok(Ident::VIdent(self.name)),
@@ -147,7 +205,7 @@ impl IntoIr for ast::Ident {
 impl IntoIr for ast::Expr {
     type Ir = Expr;
 
-    fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
+    fn into_ir(self, ctxt: Option<Ctxt>) -> Result<Self::Ir, String> {
         match self {
             ast::Expr::Ident(ident) => Ok(Expr::Ident(ident.into_ir(ctxt.clone())?)),
             ast::Expr::Value(value) => Ok(Expr::Value(value)),
@@ -156,6 +214,12 @@ impl IntoIr for ast::Expr {
             ast::Expr::Binop(lhs, binop, rhs) => Ok(Expr::Call(Call {
                 func: Box::new(Expr::Ident(Ident::Binop(binop))),
                 args: vec![lhs.into_ir(ctxt.clone())?, rhs.into_ir(ctxt.clone())?],
+            })),
+            ast::Expr::Func(func) => Ok(Expr::Func({
+                let args = func.args.into_ir(ctxt.clone())?;
+                args.borrow_mut().parent = ctxt.clone();
+                let body = Box::new(func.body.into_ir(Some(Ctxt::Args(args.clone())))?);
+                Func { args, body }
             })),
             ast::Expr::Call(call) => Ok(Expr::Call(Call {
                 func: Box::new(call.func.into_ir(ctxt.clone())?),
@@ -178,7 +242,7 @@ impl IntoIr for ast::Expr {
 impl IntoIr for ast::Block {
     type Ir = Block;
 
-    fn into_ir(self, ctxt: Option<Rc<RefCell<Struct>>>) -> Result<Self::Ir, String> {
+    fn into_ir(self, ctxt: Option<Ctxt>) -> Result<Self::Ir, String> {
         let mut stmts = Vec::new();
         for stmt in self.stmts {
             stmts.push(match stmt {
