@@ -4,6 +4,7 @@ use std::collections::HashMap;
 pub enum Value {
     I32(i32),
     String(String),
+    Char(u8),
 }
 
 pub trait Eval {

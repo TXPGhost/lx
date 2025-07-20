@@ -47,6 +47,11 @@ pub const STRING: Color = Color::TrueColor {
     g: 147,
     b: 187,
 };
+pub const CHAR: Color = Color::TrueColor {
+    r: 131,
+    g: 179,
+    b: 170,
+};
 
 #[derive(Clone, Copy, Default)]
 pub struct PrettyPrintContext {
@@ -162,11 +167,23 @@ impl PrettyPrint for Value {
                 for i in 0..parts.len() {
                     res += &format!("{}", parts[i].color(STRING));
                     if i < parts.len() - 1 {
-                        res += &format!("{}", "\\\"".color(MEMBER));
+                        res += &format!("{}", "\\\"".color(CHAR));
                     }
                 }
                 res += &format!("{}", "\"".color(STRING));
                 res
+            }
+            Value::Char(c) => {
+                let c = *c as char;
+                match c {
+                    '\'' => format!("{}", "'\\\''".color(CHAR)),
+                    _ => format!(
+                        "{}{}{}",
+                        "'".color(CHAR),
+                        c.to_string().color(CHAR),
+                        "'".color(CHAR)
+                    ),
+                }
             }
         }
     }

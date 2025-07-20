@@ -35,6 +35,8 @@ fn main() {
                 sbind(vid("z"), add(evid("x"), evid("y"))),
                 sbind(vid("tmp"), estring("some string value")),
                 sbind(vid("escaped"), estring("some \"escaped\" string")),
+                sbind(vid("char"), echar('x')),
+                sbind(vid("escaped_char"), echar('\'')),
             ]),
         ),
         fspacer(),

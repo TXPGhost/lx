@@ -74,6 +74,10 @@ pub fn estring(string: impl Into<String>) -> Expr {
     Expr::Value(Value::String(string.into()))
 }
 
+pub fn echar(char: char) -> Expr {
+    Expr::Value(Value::Char(char as u8))
+}
+
 pub fn istruct(fields: impl Into<Vec<Field>>) -> Field {
     Field::Inline(Expr::Struct(Struct {
         fields: fields.into(),
