@@ -34,7 +34,7 @@ fn main() {
                 sbindmut(vid("y"), etid("I32"), ei32(24)),
                 sbind(vid("z"), add(evid("x"), evid("y"))),
                 sbind(vid("tmp"), estring("some string value")),
-                sexpr(evid("z")),
+                sbind(vid("escaped"), estring("some \"escaped\" string")),
             ]),
         ),
         fspacer(),
@@ -54,7 +54,7 @@ fn main() {
         ),
         fspacer(),
         field(vid("projection"), eproject(evid("struct"), vid("field"))),
-        field(vid("TypeProj"), eproject(evid("struct"), tid("Type"))),
+        field(tid("TypeProj"), eproject(evid("struct"), tid("Type"))),
         fspacer(),
         field(
             vid("main"),

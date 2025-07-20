@@ -136,13 +136,7 @@ impl PrettyPrint for Expr {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         match self {
             Expr::Ident(ident) => ident.pretty_print(ctxt),
-            Expr::Value(Value::I32(n)) => format!("{}", n.to_string().color(CONST)),
-            Expr::Value(Value::String(s)) => format!(
-                "{}{}{}",
-                "\"".color(STRING),
-                s.to_string().color(STRING),
-                "\"".color(STRING)
-            ),
+            Expr::Value(value) => value.pretty_print(ctxt),
             Expr::Struct(struct_) => struct_.pretty_print(ctxt),
             Expr::Block(block) => block.pretty_print(ctxt),
             Expr::Binop(lhs, op, rhs) => format!(
@@ -153,6 +147,27 @@ impl PrettyPrint for Expr {
             ),
             Expr::Call(call) => call.pretty_print(ctxt),
             Expr::Project(project) => project.pretty_print(ctxt),
+        }
+    }
+}
+
+impl PrettyPrint for Value {
+    fn pretty_print(&self, _: PrettyPrintContext) -> String {
+        match self {
+            Value::I32(n) => format!("{}", n.to_string().color(CONST)),
+            Value::String(s) => {
+                let mut res = String::new();
+                res += &format!("{}", "\"".color(STRING));
+                let parts: Vec<&str> = s.split("\"").collect();
+                for i in 0..parts.len() {
+                    res += &format!("{}", parts[i].color(STRING));
+                    if i < parts.len() - 1 {
+                        res += &format!("{}", "\\\"".color(MEMBER));
+                    }
+                }
+                res += &format!("{}", "\"".color(STRING));
+                res
+            }
         }
     }
 }
