@@ -65,6 +65,32 @@ fn main() {
                     emethod(emethod(evid("self"), evid("len_sq"), []), evid("sqrt"), []),
                 ),
             ),
+            fspacer(),
+            field(
+                vid("to_string"),
+                efunc(
+                    args([arg(vid("self"), etid("Vector3"))]),
+                    concat(
+                        concat(
+                            concat(
+                                estring("("),
+                                emethod(eproj(evid("self"), vid("x")), evid("to_string"), []),
+                            ),
+                            concat(
+                                estring(", "),
+                                emethod(eproj(evid("self"), vid("y")), evid("to_string"), []),
+                            ),
+                        ),
+                        concat(
+                            concat(
+                                estring(", "),
+                                emethod(eproj(evid("self"), vid("z")), evid("to_string"), []),
+                            ),
+                            estring(")"),
+                        ),
+                    ),
+                ),
+            ),
         ]),
     )]);
     // let ast = estruct([

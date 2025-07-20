@@ -108,6 +108,10 @@ pub fn pow(lhs: Expr, rhs: Expr) -> Expr {
     Expr::Binop(Box::new(lhs), Binop::Pow, Box::new(rhs))
 }
 
+pub fn concat(lhs: Expr, rhs: Expr) -> Expr {
+    Expr::Binop(Box::new(lhs), Binop::Concat, Box::new(rhs))
+}
+
 pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
     Block {
         stmts: stmts.into(),

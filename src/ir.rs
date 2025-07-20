@@ -108,6 +108,7 @@ impl Ident {
             Ident::Binop(Binop::Mul) => "(*)",
             Ident::Binop(Binop::Div) => "(/)",
             Ident::Binop(Binop::Pow) => "(^)",
+            Ident::Binop(Binop::Concat) => "(++)",
             Ident::Void => "_",
         }
     }

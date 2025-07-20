@@ -87,4 +87,5 @@ pub enum Binop {
     Mul,
     Div,
     Pow,
+    Concat,
 }

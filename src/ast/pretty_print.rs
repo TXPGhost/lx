@@ -23,9 +23,9 @@ pub const FUNCTION: Color = Color::TrueColor {
     b: 167,
 };
 pub const CONSTANT: Color = Color::TrueColor {
-    r: 215,
-    g: 103,
-    b: 95,
+    r: 204,
+    g: 139,
+    b: 102,
 };
 pub const OPERATOR: Color = Color::TrueColor {
     r: 158,
@@ -267,6 +267,7 @@ impl PrettyPrint for Binop {
             Binop::Mul => format!("{}", "*".color(OPERATOR)),
             Binop::Div => format!("{}", "/".color(OPERATOR)),
             Binop::Pow => format!("{}", "^".color(OPERATOR)),
+            Binop::Concat => format!("{}", "++".color(OPERATOR)),
         }
     }
 }
