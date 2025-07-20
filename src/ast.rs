@@ -33,6 +33,7 @@ pub struct Ident {
     pub name: Rc<str>,
     pub is_type: bool,
     pub is_void: bool,
+    pub nhoist: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -44,6 +45,7 @@ pub enum Expr {
     Binop(Box<Expr>, Binop, Box<Expr>),
     Func(Func),
     Call(Call),
+    Constructor(Ident, Struct),
     Project(Project),
 }
 

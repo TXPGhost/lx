@@ -38,6 +38,7 @@ pub enum Expr {
     Block(Block),
     Func(Func),
     Call(Call),
+    Constructor(Ident, Rc<RefCell<Struct>>),
     Project(Project),
 }
 
@@ -242,6 +243,10 @@ impl IntoIr for ast::Expr {
                     args
                 },
             })),
+            ast::Expr::Constructor(ident, constructor) => Ok(Expr::Constructor(
+                ident.into_ir(ctxt.clone())?,
+                constructor.into_ir(ctxt)?,
+            )),
             ast::Expr::Project(project) => Ok(Expr::Project(Project {
                 expr: Box::new(project.expr.into_ir(ctxt.clone())?),
                 field: project.field.into_ir(ctxt)?,

@@ -52,11 +52,16 @@ pub fn inline(expr: Expr) -> Field {
     Field::Inline(expr)
 }
 
+pub fn eident(ident: Ident) -> Expr {
+    Expr::Ident(ident)
+}
+
 pub fn vid(name: &'static str) -> Ident {
     Ident {
         name: name.into(),
         is_type: false,
         is_void: false,
+        nhoist: 0,
     }
 }
 
@@ -65,6 +70,7 @@ pub fn tid(name: &'static str) -> Ident {
         name: name.into(),
         is_type: true,
         is_void: false,
+        nhoist: 0,
     }
 }
 
@@ -73,6 +79,14 @@ pub fn void() -> Ident {
         name: "_".into(),
         is_type: false,
         is_void: true,
+        nhoist: 0,
+    }
+}
+
+pub fn hoist(ident: Ident, by: usize) -> Ident {
+    Ident {
+        nhoist: by,
+        ..ident
     }
 }
 
@@ -152,6 +166,15 @@ pub fn ecall(func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
         args: args.into(),
         method_syntax: false,
     })
+}
+
+pub fn econstructor(ident: Ident, fields: impl Into<Vec<Field>>) -> Expr {
+    Expr::Constructor(
+        ident,
+        Struct {
+            fields: fields.into(),
+        },
+    )
 }
 
 pub fn method(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Call {

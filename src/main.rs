@@ -51,7 +51,14 @@ fn main() {
                             arg(vid("y"), etid("I32")),
                             arg(vid("z"), etid("I32")),
                         ]),
-                        ecall(etid("Vector3"), [evid("x"), evid("y"), evid("z")]),
+                        econstructor(
+                            tid("Vector3"),
+                            [
+                                field(vid("x"), eident(hoist(vid("x"), 1))),
+                                field(vid("y"), eident(hoist(vid("y"), 1))),
+                                field(vid("z"), eident(hoist(vid("z"), 1))),
+                            ],
+                        ),
                     ),
                 ),
                 fspacer(),

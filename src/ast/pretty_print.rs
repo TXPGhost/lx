@@ -160,6 +160,23 @@ impl PrettyPrint for Field {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Field::Field(ident, expr) => {
+                if let Expr::Ident(other) = expr
+                    && ident.is_type == other.is_type
+                    && !ident.is_void
+                    && !other.is_void
+                    && ident.name == other.name
+                    && ident.nhoist == 0
+                    && other.nhoist == 1
+                {
+                    return format!(
+                        "{}",
+                        match ident.is_type {
+                            true => ident.name.italic().bold().color(MEMBER),
+                            false => ident.name.italic().color(MEMBER),
+                        },
+                    );
+                }
+
                 format!(
                     "{} {}",
                     match ident.is_type {
@@ -211,12 +228,14 @@ impl PrettyPrint for Arg {
 
 impl PrettyPrint for Ident {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
-        match (self.is_type, ctxt.is_argument(&self.name)) {
+        let mut s = format!("{}", "^".repeat(self.nhoist).color(PUNCTUATION));
+        s += &match (self.is_type, ctxt.is_argument(&self.name)) {
             (true, true) => format!("{}", self.name.as_ref().italic().bold().color(TYPE)),
             (true, false) => format!("{}", self.name.as_ref().bold().color(TYPE)),
             (false, true) => format!("{}", self.name.as_ref().italic().color(NORMAL)),
             (false, false) => format!("{}", self.name.as_ref().color(NORMAL)),
-        }
+        };
+        s
     }
 }
 
@@ -237,6 +256,11 @@ impl PrettyPrint for Expr {
             ),
             Expr::Func(func) => func.pretty_print(ctxt),
             Expr::Call(call) => call.pretty_print(ctxt),
+            Expr::Constructor(ident, constructor) => format!(
+                "{}{}",
+                ident.pretty_print(ctxt),
+                constructor.pretty_print(ctxt)
+            ),
             Expr::Project(project) => project.pretty_print(ctxt),
         }
     }
@@ -377,11 +401,13 @@ impl PrettyPrint for Call {
             s += &self.args[0].pretty_print(ctxt);
             s += &format!("{}", ":".color(PUNCTUATION));
         }
+        let mut angle_brackets = false;
         match &*self.func {
             Expr::Ident(ident) => {
                 s += &format!(
                     "{}",
                     if ident.is_type {
+                        angle_brackets = true;
                         ident.name.bold().color(TYPE)
                     } else {
                         ident.name.color(FUNCTION)
@@ -390,8 +416,10 @@ impl PrettyPrint for Call {
             }
             _ => s += &self.func.pretty_print(ctxt),
         }
-        // if !(self.method_syntax && self.args.len() == 1) {
-        s += &format!("{}", "(".color(OPERATOR));
+        s += &format!(
+            "{}",
+            (if angle_brackets { "<" } else { "(" }).color(OPERATOR)
+        );
         let start_idx = if self.method_syntax { 1 } else { 0 };
         for i in start_idx..self.args.len() {
             s += &self.args[i].pretty_print(ctxt);
@@ -399,8 +427,10 @@ impl PrettyPrint for Call {
                 s += &format!("{}", ", ".color(PUNCTUATION));
             }
         }
-        s += &format!("{}", ")".color(OPERATOR));
-        // }
+        s += &format!(
+            "{}",
+            (if angle_brackets { ">" } else { ")" }).color(OPERATOR)
+        );
         s
     }
 }
