@@ -198,14 +198,14 @@ impl Colorscheme {
             b: 103,
         },
         operator: Color::TrueColor {
-            r: 150,
-            g: 150,
-            b: 150,
+            r: 158,
+            g: 153,
+            b: 147,
         },
         punctuation: Color::TrueColor {
-            r: 120,
-            g: 120,
-            b: 120,
+            r: 135,
+            g: 131,
+            b: 125,
         },
         string: Color::TrueColor {
             r: 216,
