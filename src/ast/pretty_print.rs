@@ -45,10 +45,24 @@ pub const STRING: Color = Color::TrueColor {
     b: 135,
 };
 
+impl Binop {
+    pub const fn include_space(self) -> bool {
+        match self {
+            Binop::Add => true,
+            Binop::Sub => true,
+            Binop::Mul => true,
+            Binop::Div => true,
+            Binop::Pow => false,
+            Binop::Concat => false,
+        }
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct PrettyPrintContext<'parent> {
     pub indent_level: usize,
     pub argumets: Cow<'parent, HashSet<String>>,
+    pub is_call: bool,
 }
 
 impl<'parent> PrettyPrintContext<'parent> {
@@ -73,6 +87,13 @@ impl<'parent> PrettyPrintContext<'parent> {
 
     pub fn is_argument(&self, argument: &str) -> bool {
         self.argumets.contains(argument)
+    }
+
+    pub fn as_call(&self, is_call: bool) -> Self {
+        Self {
+            is_call,
+            ..self.clone()
+        }
     }
 }
 
@@ -207,9 +228,11 @@ impl PrettyPrint for Expr {
             Expr::Struct(struct_) => struct_.pretty_print(ctxt),
             Expr::Block(block) => block.pretty_print(ctxt),
             Expr::Binop(lhs, op, rhs) => format!(
-                "{} {} {}",
+                "{}{}{}{}{}",
                 lhs.pretty_print(ctxt),
+                if op.include_space() { " " } else { "" },
                 op.pretty_print(ctxt),
+                if op.include_space() { " " } else { "" },
                 rhs.pretty_print(ctxt)
             ),
             Expr::Func(func) => func.pretty_print(ctxt),
@@ -295,22 +318,25 @@ impl PrettyPrint for Stmt {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Stmt::Bind(ident, expr) => {
+                let expr = expr.pretty_print(ctxt);
                 ctxt.remove_argument(&ident.name);
                 format!(
                     "{} {} {}",
                     ident.pretty_print(ctxt),
                     "=".color(OPERATOR),
-                    expr.pretty_print(ctxt)
+                    expr
                 )
             }
             Stmt::BindMut(ident, ty, expr) => {
+                let ty = ty.pretty_print(ctxt);
+                let expr = expr.pretty_print(ctxt);
                 ctxt.remove_argument(&ident.name);
                 format!(
                     "{} {} {} {}",
                     ident.pretty_print(ctxt),
-                    ty.pretty_print(ctxt),
+                    ty,
                     "=".color(OPERATOR),
-                    expr.pretty_print(ctxt)
+                    expr,
                 )
             }
             Stmt::Write(ident, expr) => {

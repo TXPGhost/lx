@@ -8,181 +8,168 @@ use ast::helpers::*;
 use crate::ast::pretty_print::PrettyPrint;
 
 fn main() {
-    let ast = estruct([field(
-        tid("Vector3"),
-        estruct([
-            field(vid("x"), etid("I32")),
-            field(vid("y"), etid("I32")),
-            field(vid("z"), etid("I32")),
-            fspacer(),
-            field(
-                vid("zero"),
-                ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(0)]),
-            ),
-            fspacer(),
-            field(
-                vid("unit_x"),
-                ecall(
-                    eproj(etid("Vector3"), vid("new")),
-                    [ei32(1), ei32(0), ei32(0)],
+    let ast = estruct([
+        field(
+            tid("Vector3"),
+            estruct([
+                field(vid("x"), etid("I32")),
+                field(vid("y"), etid("I32")),
+                field(vid("z"), etid("I32")),
+                fspacer(),
+                field(
+                    vid("zero"),
+                    ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(0)]),
                 ),
-            ),
-            field(
-                vid("unit_y"),
-                ecall(
-                    eproj(etid("Vector3"), vid("new")),
-                    [ei32(0), ei32(1), ei32(0)],
+                fspacer(),
+                field(
+                    vid("unit_x"),
+                    ecall(
+                        eproj(etid("Vector3"), vid("new")),
+                        [ei32(1), ei32(0), ei32(0)],
+                    ),
                 ),
-            ),
-            field(
-                vid("unit_z"),
-                ecall(
-                    eproj(etid("Vector3"), vid("new")),
-                    [ei32(0), ei32(0), ei32(1)],
+                field(
+                    vid("unit_y"),
+                    ecall(
+                        eproj(etid("Vector3"), vid("new")),
+                        [ei32(0), ei32(1), ei32(0)],
+                    ),
                 ),
-            ),
-            fspacer(),
-            field(
-                vid("new"),
-                efunc(
-                    args([
-                        arg(vid("x"), etid("I32")),
-                        arg(vid("y"), etid("I32")),
-                        arg(vid("z"), etid("I32")),
-                    ]),
-                    ecall(etid("Vector3"), [evid("x"), evid("y"), evid("z")]),
+                field(
+                    vid("unit_z"),
+                    ecall(
+                        eproj(etid("Vector3"), vid("new")),
+                        [ei32(0), ei32(0), ei32(1)],
+                    ),
                 ),
-            ),
-            fspacer(),
-            field(
-                vid("len_sq"),
-                efunc(
-                    args([arg(vid("self"), etid("Vector3"))]),
-                    add(
+                fspacer(),
+                field(
+                    vid("new"),
+                    efunc(
+                        args([
+                            arg(vid("x"), etid("I32")),
+                            arg(vid("y"), etid("I32")),
+                            arg(vid("z"), etid("I32")),
+                        ]),
+                        ecall(etid("Vector3"), [evid("x"), evid("y"), evid("z")]),
+                    ),
+                ),
+                fspacer(),
+                field(
+                    vid("len_sq"),
+                    efunc(
+                        args([arg(vid("self"), etid("Vector3"))]),
                         add(
-                            pow(eproj(evid("self"), vid("x")), ei32(2)),
-                            pow(eproj(evid("self"), vid("y")), ei32(2)),
-                        ),
-                        pow(eproj(evid("self"), vid("z")), ei32(2)),
-                    ),
-                ),
-            ),
-            field(
-                vid("len"),
-                efunc(
-                    args([arg(vid("self"), etid("Vector3"))]),
-                    emethod(emethod(evid("self"), evid("len_sq"), []), evid("sqrt"), []),
-                ),
-            ),
-            fspacer(),
-            field(
-                vid("to_string"),
-                efunc(
-                    args([arg(vid("self"), etid("Vector3"))]),
-                    concat(
-                        concat(
-                            concat(
-                                estring("("),
-                                emethod(eproj(evid("self"), vid("x")), evid("to_string"), []),
+                            add(
+                                pow(eproj(evid("self"), vid("x")), ei32(2)),
+                                pow(eproj(evid("self"), vid("y")), ei32(2)),
                             ),
-                            concat(
-                                estring(", "),
-                                emethod(eproj(evid("self"), vid("y")), evid("to_string"), []),
-                            ),
-                        ),
-                        concat(
-                            concat(
-                                estring(", "),
-                                emethod(eproj(evid("self"), vid("z")), evid("to_string"), []),
-                            ),
-                            estring(")"),
+                            pow(eproj(evid("self"), vid("z")), ei32(2)),
                         ),
                     ),
                 ),
-            ),
-            fspacer(),
-            field(
-                vid("normalize"),
-                efunc(
-                    args([arg_mut(vid("self"), etid("Vector3"))]),
-                    eblock([
-                        sbind(vid("len"), emethod(evid("self"), evid("len"), [])),
-                        sdiv(vid("self_DOT_x"), evid("len")),
-                        sdiv(vid("self_DOT_y"), evid("len")),
-                        sdiv(vid("self_DOT_z"), evid("len")),
-                    ]),
+                field(
+                    vid("len"),
+                    efunc(
+                        args([arg(vid("self"), etid("Vector3"))]),
+                        emethod(emethod(evid("self"), evid("len_sq"), []), evid("sqrt"), []),
+                    ),
                 ),
+                fspacer(),
+                field(
+                    vid("add"),
+                    efunc(
+                        args([
+                            arg(vid("lhs"), etid("Vector3")),
+                            arg(vid("rhs"), etid("Vector3")),
+                        ]),
+                        ecall(
+                            eproj(etid("Vector3"), vid("new")),
+                            [
+                                add(eproj(evid("lhs"), vid("x")), eproj(evid("rhs"), vid("x"))),
+                                add(eproj(evid("lhs"), vid("y")), eproj(evid("rhs"), vid("y"))),
+                                add(eproj(evid("lhs"), vid("z")), eproj(evid("rhs"), vid("z"))),
+                            ],
+                        ),
+                    ),
+                ),
+                fspacer(),
+                field(
+                    vid("to_string"),
+                    efunc(
+                        args([arg(vid("self"), etid("Vector3"))]),
+                        concat(
+                            concat(
+                                concat(
+                                    estring("("),
+                                    emethod(eproj(evid("self"), vid("x")), evid("to_string"), []),
+                                ),
+                                concat(
+                                    estring(", "),
+                                    emethod(eproj(evid("self"), vid("y")), evid("to_string"), []),
+                                ),
+                            ),
+                            concat(
+                                concat(
+                                    estring(", "),
+                                    emethod(eproj(evid("self"), vid("z")), evid("to_string"), []),
+                                ),
+                                estring(")"),
+                            ),
+                        ),
+                    ),
+                ),
+                fspacer(),
+                field(
+                    vid("normalize"),
+                    efunc(
+                        args([arg_mut(vid("self"), etid("Vector3"))]),
+                        eblock([
+                            sbind(vid("len"), emethod(evid("self"), evid("len"), [])),
+                            sdiv(vid("self_DOT_x"), evid("len")),
+                            sdiv(vid("self_DOT_y"), evid("len")),
+                            sdiv(vid("self_DOT_z"), evid("len")),
+                        ]),
+                    ),
+                ),
+            ]),
+        ),
+        fspacer(),
+        field(
+            tid("main"),
+            efunc(
+                args([arg_mut(vid("io"), etid("IO"))]),
+                eblock([
+                    sbind(
+                        vid("vec_a"),
+                        ecall(
+                            eproj(etid("Vector3"), vid("new")),
+                            [ei32(1), ei32(2), ei32(3)],
+                        ),
+                    ),
+                    sbind(
+                        vid("vec_b"),
+                        ecall(
+                            eproj(etid("Vector3"), vid("new")),
+                            [ei32(4), ei32(5), ei32(6)],
+                        ),
+                    ),
+                    sbind(
+                        vid("vec_c"),
+                        ecall(
+                            eproj(etid("Vector3"), vid("add")),
+                            [evid("vec_a"), evid("vec_b")],
+                        ),
+                    ),
+                    sexpr(emethod(
+                        evid("io"),
+                        evid("println"),
+                        [emethod(evid("vec_c"), evid("to_string"), [])],
+                    )),
+                ]),
             ),
-        ]),
-    )]);
-    // let ast = estruct([
-    //     inline(evid("std")),
-    //     fspacer(),
-    //     field(vid("first"), ei32(1)),
-    //     field(vid("second"), ei32(2)),
-    //     field(vid("third"), ei32(3)),
-    //     fspacer(),
-    //     field(
-    //         tid("Vector3"),
-    //         estruct([
-    //             field(vid("x"), etid("I32")),
-    //             field(vid("y"), etid("I32")),
-    //             field(vid("z"), etid("I32")),
-    //             fspacer(),
-    //             field(
-    //                 vid("zero"),
-    //                 ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(0)]),
-    //             ),
-    //         ]),
-    //     ),
-    //     fspacer(),
-    //     istruct([field(vid("d"), ei32(4)), field(vid("e"), ei32(5))]),
-    //     fspacer(),
-    //     field(vid("ans"), add(evid("a"), evid("b"))),
-    //     field(
-    //         vid("block_example"),
-    //         eblock([
-    //             sbind(vid("x"), ei32(42)),
-    //             sbindmut(vid("y"), etid("I32"), ei32(24)),
-    //             sbind(vid("z"), add(evid("x"), evid("y"))),
-    //             sbind(vid("tmp"), estring("some string value")),
-    //             sbind(vid("escaped"), estring("some \"escaped\" string")),
-    //             sbind(vid("char"), echar('x')),
-    //             sbind(vid("escaped_char"), echar('\'')),
-    //         ]),
-    //     ),
-    //     fspacer(),
-    //     field(
-    //         vid("result"),
-    //         ecall(evid("get_value"), [ei32(1), ei32(2), evid("w")]),
-    //     ),
-    //     fspacer(),
-    //     field(vid("empty_block"), eblock([])),
-    //     fspacer(),
-    //     field(vid("unit_block"), eblock([sexpr(ecall(evid("func"), []))])),
-    //     field(vid("unit"), estruct([])),
-    //     fspacer(),
-    //     field(
-    //         vid("single"),
-    //         estruct([field(vid("value"), etid("String"))]),
-    //     ),
-    //     fspacer(),
-    //     field(vid("projection"), eproject(evid("struct"), vid("field"))),
-    //     field(tid("TypeProj"), eproject(evid("struct"), tid("Type"))),
-    //     fspacer(),
-    //     field(vid("main"), efunc(args([aident(tid("Int"))]), etid("Int"))),
-    //     fspacer(),
-    //     field(
-    //         vid("main"),
-    //         efunc(
-    //             args([arg_mut(vid("io"), etid("IO"))]),
-    //             eblock([
-    //                 sbind(vid("msg"), estring("Hello, world!")),
-    //                 sexpr(ecall(evid("print"), [evid("msg")])),
-    //             ]),
-    //         ),
-    //     ),
-    // ]);
+        ),
+    ]);
 
     println!("{}", ast.pretty_print_string());
 
