@@ -33,9 +33,9 @@ pub const OPERATOR: Color = Color::TrueColor {
     b: 140,
 };
 pub const PUNCTUATION: Color = Color::TrueColor {
-    r: 134,
-    g: 128,
-    b: 118,
+    r: 138,
+    g: 132,
+    b: 122,
 };
 pub const STRING: Color = Color::TrueColor {
     r: 175,
