@@ -17,25 +17,25 @@ pub const TYPE: Color = Color::TrueColor {
     g: 175,
     b: 167,
 };
-pub const FUNC: Color = Color::TrueColor {
+pub const FUNCTION: Color = Color::TrueColor {
     r: 149,
     g: 174,
     b: 167,
 };
-pub const CONST: Color = Color::TrueColor {
+pub const CONSTANT: Color = Color::TrueColor {
     r: 215,
     g: 103,
     b: 95,
 };
-pub const PUNCT: Color = Color::TrueColor {
+pub const OPERATOR: Color = Color::TrueColor {
     r: 158,
     g: 151,
     b: 140,
 };
-pub const GROUP: Color = Color::TrueColor {
-    r: 138,
-    g: 132,
-    b: 122,
+pub const PUNCTUATION: Color = Color::TrueColor {
+    r: 134,
+    g: 128,
+    b: 118,
 };
 pub const STRING: Color = Color::TrueColor {
     r: 175,
@@ -70,25 +70,25 @@ pub trait PrettyPrint {
 impl PrettyPrint for Struct {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         if self.fields.is_empty() {
-            return format!("{}", "()".color(GROUP));
+            return format!("{}", "()".color(PUNCTUATION));
         }
         if self.fields.len() == 1 {
             return format!(
                 "{}{}{}",
-                "(".color(GROUP),
+                "(".color(PUNCTUATION),
                 self.fields[0].pretty_print(ctxt),
-                ")".color(GROUP)
+                ")".color(PUNCTUATION)
             );
         }
         let mut s = String::new();
-        s += &format!("{}\n", "(".color(GROUP));
+        s += &format!("{}\n", "(".color(PUNCTUATION));
         for field in &self.fields {
             s += &ctxt.indented().indent();
             s += &field.pretty_print(ctxt);
             s += "\n";
         }
         s += &ctxt.indent();
-        s += &format!("{}", ")".color(GROUP));
+        s += &format!("{}", ")".color(PUNCTUATION));
         s
     }
 }
@@ -96,25 +96,25 @@ impl PrettyPrint for Struct {
 impl PrettyPrint for Args {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         if self.args.is_empty() {
-            return format!("{}", "()".color(GROUP));
+            return format!("{}", "()".color(OPERATOR));
         }
         if self.args.len() == 1 {
             return format!(
                 "{}{}{}",
-                "(".color(GROUP),
+                "(".color(OPERATOR),
                 self.args[0].pretty_print(ctxt),
-                ")".color(GROUP)
+                ")".color(OPERATOR)
             );
         }
         let mut s = String::new();
-        s += &format!("{}\n", "(".color(GROUP));
+        s += &format!("{}\n", "(".color(OPERATOR));
         for field in &self.args {
             s += &ctxt.indented().indent();
             s += &field.pretty_print(ctxt);
             s += "\n";
         }
         s += &ctxt.indent();
-        s += &format!("{}", ")".color(GROUP));
+        s += &format!("{}", ")".color(OPERATOR));
         s
     }
 }
@@ -134,7 +134,7 @@ impl PrettyPrint for Field {
             }
             Field::Inline(expr) => format!(
                 "{}{}",
-                "..".color(PUNCT),
+                "..".color(OPERATOR),
                 expr.pretty_print(ctxt.indented())
             ),
             Field::Spacer => "".to_string(),
@@ -145,9 +145,10 @@ impl PrettyPrint for Field {
 impl PrettyPrint for Arg {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         match self {
-            Arg::Named(ident, expr) => {
+            Arg::Named(is_mut, ident, expr) => {
                 format!(
-                    "{} {}",
+                    "{}{} {}",
+                    (if *is_mut { "&" } else { "" }).color(PUNCTUATION),
                     match ident.is_type {
                         true => ident.name.italic().bold().color(NORMAL),
                         false => ident.name.italic().color(NORMAL),
@@ -155,9 +156,10 @@ impl PrettyPrint for Arg {
                     expr.pretty_print(ctxt.indented())
                 )
             }
-            Arg::Ident(ident) => {
+            Arg::Ident(is_mut, ident) => {
                 format!(
-                    "{}",
+                    "{}{}",
+                    (if *is_mut { "&" } else { "" }).color(PUNCTUATION),
                     match ident.is_type {
                         true => ident.name.bold().color(TYPE),
                         false => ident.name.italic().color(NORMAL),
@@ -201,7 +203,7 @@ impl PrettyPrint for Expr {
 impl PrettyPrint for Value {
     fn pretty_print(&self, _: PrettyPrintContext) -> String {
         match self {
-            Value::I32(n) => format!("{}", n.to_string().color(CONST)),
+            Value::I32(n) => format!("{}", n.to_string().color(CONSTANT)),
             Value::String(s) => {
                 let mut res = String::new();
                 res += &format!("{}", "\"".color(STRING));
@@ -209,7 +211,7 @@ impl PrettyPrint for Value {
                 for i in 0..parts.len() {
                     res += &format!("{}", parts[i].color(STRING));
                     if i < parts.len() - 1 {
-                        res += &format!("{}", "\\\"".color(FUNC));
+                        res += &format!("{}", "\\\"".color(FUNCTION));
                     }
                 }
                 res += &format!("{}", "\"".color(STRING));
@@ -221,7 +223,7 @@ impl PrettyPrint for Value {
                     "{}{}{}",
                     "'".color(STRING),
                     match c {
-                        '\'' => "\\\'".color(FUNC),
+                        '\'' => "\\\'".color(FUNCTION),
                         _ => c.to_string().color(STRING),
                     },
                     "'".color(STRING)
@@ -234,25 +236,25 @@ impl PrettyPrint for Value {
 impl PrettyPrint for Block {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         if self.stmts.is_empty() {
-            return format!("{}", "{}".color(GROUP));
+            return format!("{}", "{}".color(PUNCTUATION));
         }
         if self.stmts.len() == 1 {
             return format!(
                 "{} {} {}",
-                "{".color(GROUP),
+                "{".color(PUNCTUATION),
                 self.stmts[0].pretty_print(ctxt),
-                "}".color(GROUP)
+                "}".color(PUNCTUATION)
             );
         }
         let mut s = String::new();
-        s += &format!("{}\n", "{".color(GROUP));
+        s += &format!("{}\n", "{".color(PUNCTUATION));
         for stmt in &self.stmts {
             s += &ctxt.indented().indent();
             s += &stmt.pretty_print(ctxt);
             s += "\n";
         }
         s += &ctxt.indent();
-        s += &format!("{}", "}".color(GROUP));
+        s += &format!("{}", "}".color(PUNCTUATION));
         s
     }
 }
@@ -260,7 +262,7 @@ impl PrettyPrint for Block {
 impl PrettyPrint for Binop {
     fn pretty_print(&self, _: PrettyPrintContext) -> String {
         match self {
-            Binop::Add => format!("{}", "+".color(PUNCT)),
+            Binop::Add => format!("{}", "+".color(OPERATOR)),
         }
     }
 }
@@ -272,7 +274,7 @@ impl PrettyPrint for Stmt {
                 format!(
                     "{} {} {}",
                     ident.pretty_print(ctxt),
-                    "=".color(PUNCT),
+                    "=".color(OPERATOR),
                     expr.pretty_print(ctxt)
                 )
             }
@@ -280,14 +282,14 @@ impl PrettyPrint for Stmt {
                 "{} {} {} {}",
                 ident.pretty_print(ctxt),
                 ty.pretty_print(ctxt),
-                "=".color(PUNCT),
+                "=".color(OPERATOR),
                 expr.pretty_print(ctxt)
             ),
             Stmt::Write(ident, expr) => {
                 format!(
                     "{} {} {}",
                     ident.pretty_print(ctxt),
-                    ":=".color(PUNCT),
+                    ":=".color(OPERATOR),
                     expr.pretty_print(ctxt)
                 )
             }
@@ -295,7 +297,7 @@ impl PrettyPrint for Stmt {
                 "{} {}{} {}",
                 ident.pretty_print(ctxt),
                 binop.pretty_print(ctxt),
-                "=".color(PUNCT),
+                "=".color(OPERATOR),
                 expr.pretty_print(ctxt)
             ),
             Stmt::Expr(expr) => expr.pretty_print(ctxt).to_string(),
@@ -323,20 +325,20 @@ impl PrettyPrint for Call {
                     if ident.is_type {
                         ident.name.bold().color(TYPE)
                     } else {
-                        ident.name.color(FUNC)
+                        ident.name.color(FUNCTION)
                     }
                 )
             }
             _ => s += &self.func.pretty_print(ctxt),
         }
-        s += &format!("{}", "(".color(PUNCT));
+        s += &format!("{}", "(".color(OPERATOR));
         for i in 0..self.args.len() {
             s += &self.args[i].pretty_print(ctxt);
             if i < self.args.len() - 1 {
-                s += &format!("{}", ", ".color(PUNCT));
+                s += &format!("{}", ", ".color(OPERATOR));
             }
         }
-        s += &format!("{}", ")".color(PUNCT));
+        s += &format!("{}", ")".color(OPERATOR));
         s
     }
 }
@@ -346,7 +348,7 @@ impl PrettyPrint for Project {
         format!(
             "{}{}{}",
             self.expr.pretty_print(ctxt),
-            ".".color(PUNCT),
+            ".".color(OPERATOR),
             if self.field.is_type {
                 self.field.name.bold().color(TYPE)
             } else {

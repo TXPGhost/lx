@@ -23,8 +23,8 @@ pub enum Field {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Arg {
-    Named(Ident, Expr),
-    Ident(Ident),
+    Named(bool, Ident, Expr),
+    Ident(bool, Ident),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -112,11 +112,19 @@ pub fn field(ident: Ident, expr: Expr) -> Field {
 }
 
 pub fn arg(ident: Ident, expr: Expr) -> Arg {
-    Arg::Named(ident, expr)
+    Arg::Named(false, ident, expr)
+}
+
+pub fn arg_mut(ident: Ident, expr: Expr) -> Arg {
+    Arg::Named(true, ident, expr)
 }
 
 pub fn aident(ident: Ident) -> Arg {
-    Arg::Ident(ident)
+    Arg::Ident(false, ident)
+}
+
+pub fn aident_mut(ident: Ident) -> Arg {
+    Arg::Ident(true, ident)
 }
 
 pub fn fspacer() -> Field {

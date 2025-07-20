@@ -18,7 +18,7 @@ pub struct Struct {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Args {
-    pub args: HashMap<Ident, Expr>,
+    pub args: HashMap<Ident, (bool, Expr)>,
     pub parent: Option<Ctxt>,
 }
 
@@ -82,7 +82,7 @@ impl Ctxt {
                 },
             },
             Ctxt::Args(args) => match args.borrow().args.get(&ident) {
-                Some(expr) => Some(expr.clone()),
+                Some((_, expr)) => Some(expr.clone()),
                 None => match &args.borrow().parent {
                     Some(parent) => parent.lookup(ident).clone(),
                     None => None,
@@ -169,18 +169,24 @@ impl IntoIr for ast::Args {
         let mut args = HashMap::new();
         for arg in self.args {
             match arg {
-                ast::Arg::Named(ident, expr) => {
+                ast::Arg::Named(is_mut, ident, expr) => {
                     let name = ident.name.clone();
                     if args
-                        .insert(ident.into_ir(ctxt.clone())?, expr.into_ir(ctxt.clone())?)
+                        .insert(
+                            ident.into_ir(ctxt.clone())?,
+                            (is_mut, expr.into_ir(ctxt.clone())?),
+                        )
                         .is_some()
                     {
                         return Err(format!("duplicate argument {name}"));
                     }
                 }
-                ast::Arg::Ident(ident) => {
+                ast::Arg::Ident(is_mut, ident) => {
                     if ident.is_type {
-                        args.insert(Ident::Void, Expr::Ident(ident.into_ir(ctxt.clone())?));
+                        args.insert(
+                            Ident::Void,
+                            (is_mut, Expr::Ident(ident.into_ir(ctxt.clone())?)),
+                        );
                     } else {
                         panic!("not yet implemented")
                     }

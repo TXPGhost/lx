@@ -68,7 +68,7 @@ fn main() {
         field(
             vid("main"),
             efunc(
-                args([arg(vid("io"), etid("IO"))]),
+                args([arg_mut(vid("io"), etid("IO"))]),
                 eblock([
                     sbind(vid("msg"), estring("Hello, world!")),
                     sexpr(ecall(evid("print"), [evid("msg")])),
