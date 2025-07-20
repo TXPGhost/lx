@@ -8,29 +8,24 @@ pub const NORMAL: Color = Color::TrueColor {
     b: 187,
 };
 pub const MEMBER: Color = Color::TrueColor {
-    r: 191,
-    g: 164,
-    b: 122,
+    r: 155,
+    g: 155,
+    b: 173,
 };
 pub const TYPE: Color = Color::TrueColor {
-    r: 209,
-    g: 183,
-    b: 142,
-};
-pub const TYPE_MEMBER: Color = Color::TrueColor {
-    r: 196,
-    g: 172,
-    b: 133,
+    r: 143,
+    g: 175,
+    b: 167,
 };
 pub const FUNC: Color = Color::TrueColor {
-    r: 209,
-    g: 167,
-    b: 100,
+    r: 149,
+    g: 174,
+    b: 167,
 };
 pub const CONST: Color = Color::TrueColor {
-    r: 198,
-    g: 70,
-    b: 64,
+    r: 215,
+    g: 103,
+    b: 95,
 };
 pub const PUNCT: Color = Color::TrueColor {
     r: 158,
@@ -43,14 +38,9 @@ pub const GROUP: Color = Color::TrueColor {
     b: 122,
 };
 pub const STRING: Color = Color::TrueColor {
-    r: 98,
-    g: 147,
-    b: 187,
-};
-pub const CHAR: Color = Color::TrueColor {
-    r: 131,
-    g: 179,
-    b: 170,
+    r: 175,
+    g: 175,
+    b: 135,
 };
 
 #[derive(Clone, Copy, Default)]
@@ -110,7 +100,7 @@ impl PrettyPrint for Field {
                 format!(
                     "{} {}",
                     if ident.is_type {
-                        format!("{}", ident.name.bold().color(TYPE_MEMBER))
+                        format!("{}", ident.name.bold().color(MEMBER))
                     } else {
                         format!("{}", ident.name.color(MEMBER))
                     },
@@ -167,7 +157,7 @@ impl PrettyPrint for Value {
                 for i in 0..parts.len() {
                     res += &format!("{}", parts[i].color(STRING));
                     if i < parts.len() - 1 {
-                        res += &format!("{}", "\\\"".color(CHAR));
+                        res += &format!("{}", "\\\"".color(FUNC));
                     }
                 }
                 res += &format!("{}", "\"".color(STRING));
@@ -175,15 +165,15 @@ impl PrettyPrint for Value {
             }
             Value::Char(c) => {
                 let c = *c as char;
-                match c {
-                    '\'' => format!("{}", "'\\\''".color(CHAR)),
-                    _ => format!(
-                        "{}{}{}",
-                        "'".color(CHAR),
-                        c.to_string().color(CHAR),
-                        "'".color(CHAR)
-                    ),
-                }
+                format!(
+                    "{}{}{}",
+                    "'".color(STRING),
+                    match c {
+                        '\'' => "\\\'".color(FUNC),
+                        _ => c.to_string().color(STRING),
+                    },
+                    "'".color(STRING)
+                )
             }
         }
     }
@@ -265,7 +255,16 @@ impl PrettyPrint for Call {
     fn pretty_print(&self, ctxt: PrettyPrintContext) -> String {
         let mut s = String::new();
         match &*self.func {
-            Expr::Ident(ident) => s += &format!("{}", ident.name.color(FUNC)),
+            Expr::Ident(ident) => {
+                s += &format!(
+                    "{}",
+                    if ident.is_type {
+                        ident.name.bold().color(TYPE)
+                    } else {
+                        ident.name.color(FUNC)
+                    }
+                )
+            }
             _ => s += &self.func.pretty_print(ctxt),
         }
         s += &format!("{}", "(".color(PUNCT));

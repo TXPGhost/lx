@@ -21,6 +21,11 @@ fn main() {
                 field(vid("x"), etid("I32")),
                 field(vid("y"), etid("I32")),
                 field(vid("z"), etid("I32")),
+                fspacer(),
+                field(
+                    vid("zero"),
+                    ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(0)]),
+                ),
             ]),
         ),
         fspacer(),
