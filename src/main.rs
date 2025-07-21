@@ -2,11 +2,14 @@ pub mod ast;
 pub mod colorscheme;
 pub mod eval;
 pub mod ir;
+pub mod subtype;
+
+use std::collections::HashMap;
 
 use ast::helpers::*;
-// use ir::IntoIr;
+use ir::IntoIr;
 
-use crate::ast::pretty_print::PrettyPrint;
+use crate::{ast::pretty_print::PrettyPrint, eval::Eval};
 
 fn main() {
     let ast = estruct([
@@ -188,7 +191,8 @@ fn main() {
 
     println!("{}", ast.pretty_print_string());
 
-    // let ir = ast.into_ir(None).unwrap();
+    let ir = ast.into_ir(None).unwrap();
+    let ans = ir.eval(&mut HashMap::new()).unwrap();
 
-    // dbg!(&ir);
+    dbg!(ans);
 }

@@ -3,7 +3,7 @@ pub mod pretty_print;
 
 use std::rc::Rc;
 
-use crate::eval::Value;
+use crate::ir::Prim;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
@@ -39,7 +39,7 @@ pub struct Ident {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expr {
     Ident(Ident),
-    Value(Value),
+    Prim(Prim),
     Struct(Struct),
     Block(Block),
     Binop(Box<Expr>, Binop, Box<Expr>),

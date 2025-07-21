@@ -230,7 +230,7 @@ impl PrettyPrint for Expr {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Expr::Ident(ident) => ident.pretty_print(ctxt),
-            Expr::Value(value) => value.pretty_print(ctxt),
+            Expr::Prim(value) => value.pretty_print(ctxt),
             Expr::Struct(struct_) => {
                 let res = struct_.pretty_print(&mut ctxt.with_expand(false).with_colors(false));
                 if res.lines().map(|s| s.chars().count()).max().unwrap_or(0) > ctxt.max_width {
@@ -263,11 +263,11 @@ impl PrettyPrint for Expr {
     }
 }
 
-impl PrettyPrint for Value {
+impl PrettyPrint for Prim {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
-            Value::I32(n) => ctxt.color(n.to_string(), ctxt.cs.constant),
-            Value::String(s) => {
+            Prim::I32(n) => ctxt.color(n.to_string(), ctxt.cs.constant),
+            Prim::String(s) => {
                 let mut res = String::new();
                 res += &ctxt.color("\"", ctxt.cs.string);
                 let parts: Vec<&str> = s.split("\"").collect();
@@ -280,7 +280,7 @@ impl PrettyPrint for Value {
                 res += &ctxt.color("\"", ctxt.cs.string);
                 res
             }
-            Value::Char(c) => {
+            Prim::Char(c) => {
                 let c = *c as char;
                 ctxt.color("'", ctxt.cs.string)
                     + &match c {
