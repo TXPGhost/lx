@@ -1,73 +1,104 @@
 use super::*;
 
-pub fn args(args: impl Into<Vec<Arg>>) -> Args {
+pub fn args<'a, M: NodeMeta>(args: impl Into<Vec<Node<Arg<'a, M>, M>>>) -> Args<'a, M> {
     Args { args: args.into() }
 }
 
-pub fn estruct(fields: impl Into<Vec<Field>>) -> Expr {
-    Expr::Struct(Struct {
-        fields: fields.into(),
-    })
+pub fn estruct<'a, M: NodeMeta>(
+    fields: impl Into<Vec<Node<Field<'a, M>, M>>>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Struct(Struct {
+            fields: fields.into(),
+        }),
+        M::default(),
+    )
 }
 
-pub fn estring(string: impl Into<String>) -> Expr {
-    Expr::Prim(Prim::String(string.into()))
+pub fn estring<'a, M: NodeMeta + Default>(string: impl Into<String>) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Prim(Prim::String(string.into())), M::default())
 }
 
-pub fn echar(char: char) -> Expr {
-    Expr::Prim(Prim::Char(char as u8))
+pub fn echar<'a, M: NodeMeta + Default>(char: char) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Prim(Prim::Char(char as u8)), M::default())
 }
 
-pub fn istruct(fields: impl Into<Vec<Field>>) -> Field {
-    Field::Inline(Expr::Struct(Struct {
-        fields: fields.into(),
-    }))
+pub fn istruct<'a, M: NodeMeta + Default>(
+    fields: impl Into<Vec<Node<Field<'a, M>, M>>>,
+) -> Node<Field<'a, M>, M> {
+    Node::new(
+        Field::Inline(Expr::Struct(Struct {
+            fields: fields.into(),
+        })),
+        M::default(),
+    )
 }
 
-pub fn field(ident: Ident, expr: Expr) -> Field {
-    Field::Field(ident, expr)
+pub fn field<'a, M: NodeMeta + Default>(
+    ident: Ident,
+    expr: Node<Expr<'a, M>, M>,
+) -> Node<Field<'a, M>, M> {
+    Node::new(Field::Field(ident, expr), M::default())
 }
 
-pub fn arg(ident: Ident, expr: Expr) -> Arg {
-    Arg::Named(Named {
-        is_mut: false,
-        name: ident,
-        value: expr,
-    })
+pub fn arg<'a, M: NodeMeta + Default>(
+    ident: Ident,
+    expr: Node<Expr<'a, M>, M>,
+) -> Node<Arg<'a, M>, M> {
+    Node::new(
+        Arg::Named(NamedArg {
+            is_mut: false,
+            name: ident,
+            value: expr,
+        }),
+        M::default(),
+    )
 }
 
-pub fn arg_mut(ident: Ident, expr: Expr) -> Arg {
-    Arg::Named(Named {
-        is_mut: true,
-        name: ident,
-        value: expr,
-    })
+pub fn arg_mut<'a, M: NodeMeta + Default>(
+    ident: Ident,
+    expr: Node<Expr<'a, M>, M>,
+) -> Node<Arg<'a, M>, M> {
+    Node::new(
+        Arg::Named(NamedArg {
+            is_mut: true,
+            name: ident,
+            value: expr,
+        }),
+        M::default(),
+    )
 }
 
-pub fn aident(ident: Ident) -> Arg {
-    Arg::Ident(ArgIdent {
-        is_mut: false,
-        name: ident,
-    })
+pub fn aident<M: NodeMeta + Default>(ident: Ident) -> Node<Arg<'static, M>, M> {
+    Node::new(
+        Arg::Ident(IdentArg {
+            is_mut: false,
+            name: ident,
+        }),
+        M::default(),
+    )
 }
 
-pub fn aident_mut(ident: Ident) -> Arg {
-    Arg::Ident(ArgIdent {
-        is_mut: true,
-        name: ident,
-    })
+pub fn aident_mut<M: NodeMeta + Default>(ident: Ident) -> Node<Arg<'static, M>, M> {
+    Node::new(
+        Arg::Ident(IdentArg {
+            is_mut: true,
+            name: ident,
+        }),
+        M::default(),
+    )
 }
 
-pub fn fspacer() -> Field {
-    Field::Spacer
+pub fn fspacer<'a, M: NodeMeta + Default>() -> Node<Field<'a, M>, M> {
+    Node::new(Field::Spacer, M::default())
 }
 
-pub fn inline(expr: Expr) -> Field {
-    Field::Inline(expr)
+pub fn inline<'a, M: NodeMeta + Default>(expr: Expr<'a, M>) -> Node<Field<'a, M>, M> {
+    Node::new(Field::Inline(expr), M::default())
 }
 
-pub fn eident(ident: Ident) -> Expr {
-    Expr::Ident(ident)
+pub fn eident<'a, M: NodeMeta + Default>(ident: Ident) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Ident(ident), M::default())
 }
 
 pub fn vid(name: &'static str) -> Ident {
@@ -110,207 +141,329 @@ pub fn hoist(ident: Ident, by: usize) -> Ident {
     }
 }
 
-pub fn evid(name: &'static str) -> Expr {
-    Expr::Ident(vid(name))
+pub fn evid<'a, M: NodeMeta + Default>(name: &'static str) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Ident(vid(name)), M::default())
 }
 
-pub fn etid(name: &'static str) -> Expr {
-    Expr::Ident(tid(name))
+pub fn etid<'a, M: NodeMeta + Default>(name: &'static str) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Ident(tid(name)), M::default())
 }
 
-pub fn ei32(n: i32) -> Expr {
-    Expr::Prim(Prim::I32(n))
+pub fn ei32<'a, M: NodeMeta + Default>(n: i32) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Prim(Prim::I32(n)), M::default())
 }
 
-pub fn add(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Binop {
-        left: Box::new(lhs),
-        op: BinopKind::Add,
-        right: Box::new(rhs),
-    })
+pub fn add<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Binop(Binop {
+            left: lhs,
+            op: BinopKind::Add,
+            right: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sub(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Binop {
-        left: Box::new(lhs),
-        op: BinopKind::Sub,
-        right: Box::new(rhs),
-    })
+pub fn sub<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Binop(Binop {
+            left: lhs,
+            op: BinopKind::Sub,
+            right: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn mul(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Binop {
-        left: Box::new(lhs),
-        op: BinopKind::Mul,
-        right: Box::new(rhs),
-    })
+pub fn mul<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Binop(Binop {
+            left: lhs,
+            op: BinopKind::Mul,
+            right: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn div(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Binop {
-        left: Box::new(lhs),
-        op: BinopKind::Div,
-        right: Box::new(rhs),
-    })
+pub fn div<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Binop(Binop {
+            left: lhs,
+            op: BinopKind::Div,
+            right: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn pow(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Binop {
-        left: Box::new(lhs),
-        op: BinopKind::Pow,
-        right: Box::new(rhs),
-    })
+pub fn pow<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Binop(Binop {
+            left: lhs,
+            op: BinopKind::Pow,
+            right: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn concat(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Binop {
-        left: Box::new(lhs),
-        op: BinopKind::Concat,
-        right: Box::new(rhs),
-    })
+pub fn concat<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Binop(Binop {
+            left: lhs,
+            op: BinopKind::Concat,
+            right: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
+pub fn block<'a, M: NodeMeta>(stmts: impl Into<Vec<Node<Stmt<'a, M>, M>>>) -> Block<'a, M> {
     Block {
         stmts: stmts.into(),
     }
 }
 
-pub fn eblock(stmts: impl Into<Vec<Stmt>>) -> Expr {
-    Expr::Block(Block {
-        stmts: stmts.into(),
-    })
+pub fn eblock<'a, M: NodeMeta + Default>(
+    stmts: impl Into<Vec<Node<Stmt<'a, M>, M>>>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Block(Block {
+            stmts: stmts.into(),
+        }),
+        M::default(),
+    )
 }
 
-pub fn efunc(args: Args, body: Expr) -> Expr {
-    Expr::Func(Func {
-        args,
-        body: Box::new(body),
-    })
+pub fn efunc<'a, M: NodeMeta + Default>(
+    args: Args<'a, M>,
+    body: Node<Expr<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Func(Func { args, body }), M::default())
 }
 
-pub fn eproj(expr: Expr, field: Ident) -> Expr {
-    Expr::Project(Project {
-        expr: Box::new(expr),
-        field,
-    })
+pub fn eproj<'a, M: NodeMeta + Default>(
+    expr: Node<Expr<'a, M>, M>,
+    field: Ident,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(Expr::Project(Project { expr, field }), M::default())
 }
 
-pub fn call(func: Expr, args: impl Into<Vec<Expr>>) -> Call {
+pub fn call<'a, M: NodeMeta>(
+    func: Node<Expr<'a, M>, M>,
+    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
+) -> Call<'a, M> {
     Call {
-        func: Box::new(func),
+        func,
         args: args.into(),
         method_syntax: false,
     }
 }
 
-pub fn ecall(func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
-    Expr::Call(Call {
-        func: Box::new(func),
-        args: args.into(),
-        method_syntax: false,
-    })
+pub fn ecall<'a, M: NodeMeta + Default>(
+    func: Node<Expr<'a, M>, M>,
+    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Call(Call {
+            func,
+            args: args.into(),
+            method_syntax: false,
+        }),
+        M::default(),
+    )
 }
 
-pub fn econstructor(ident: Ident, fields: impl Into<Vec<Field>>) -> Expr {
-    Expr::Constructor(Constructor {
-        name: ident,
-        fields: Struct {
-            fields: fields.into(),
-        },
-    })
+pub fn econstructor<'a, M: NodeMeta + Default>(
+    ident: Ident,
+    fields: impl Into<Vec<Node<Field<'a, M>, M>>>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Constructor(Constructor {
+            name: ident,
+            fields: Struct {
+                fields: fields.into(),
+            },
+        }),
+        M::default(),
+    )
 }
 
-pub fn method(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Call {
+pub fn method<'a, M: NodeMeta>(
+    obj: Node<Expr<'a, M>, M>,
+    func: Node<Expr<'a, M>, M>,
+    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
+) -> Call<'a, M> {
     let mut args = args.into();
     args.insert(0, obj);
     Call {
-        func: Box::new(func),
+        func,
         args,
         method_syntax: true,
     }
 }
 
-pub fn emethod(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
+pub fn emethod<'a, M: NodeMeta + Default>(
+    obj: Node<Expr<'a, M>, M>,
+    func: Node<Expr<'a, M>, M>,
+    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
+) -> Node<Expr<'a, M>, M> {
     let mut args = args.into();
     args.insert(0, obj);
-    Expr::Call(Call {
-        func: Box::new(func),
-        args,
-        method_syntax: true,
-    })
+    Node::new(
+        Expr::Call(Call {
+            func,
+            args,
+            method_syntax: true,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sbind(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Bind(Bind {
-        name: ident,
-        value: expr,
-    })
+pub fn sbind<'a, M: NodeMeta + Default>(
+    ident: Ident,
+    expr: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Bind(Bind {
+            name: ident,
+            value: expr,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sbindmut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
-    Stmt::BindMut(BindMut {
-        name: ident,
-        initial: ty,
-        update: expr,
-    })
+pub fn sbindmut<'a, M: NodeMeta + Default>(
+    ident: Ident,
+    ty: Node<Expr<'a, M>, M>,
+    expr: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::BindMut(BindMut {
+            name: ident,
+            initial: ty,
+            update: expr,
+        }),
+        M::default(),
+    )
 }
 
-pub fn swrite(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Write(Write {
-        target: lhs,
-        value: rhs,
-    })
+pub fn swrite<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Write(Write {
+            target: lhs,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sadd(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(Update {
-        target: lhs,
-        op: BinopKind::Add,
-        value: rhs,
-    })
+pub fn sadd<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Update(Update {
+            target: lhs,
+            op: BinopKind::Add,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn ssub(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(Update {
-        target: lhs,
-        op: BinopKind::Sub,
-        value: rhs,
-    })
+pub fn ssub<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Update(Update {
+            target: lhs,
+            op: BinopKind::Sub,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn smul(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(Update {
-        target: lhs,
-        op: BinopKind::Mul,
-        value: rhs,
-    })
+pub fn smul<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Update(Update {
+            target: lhs,
+            op: BinopKind::Mul,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sdiv(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(Update {
-        target: lhs,
-        op: BinopKind::Div,
-        value: rhs,
-    })
+pub fn sdiv<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Update(Update {
+            target: lhs,
+            op: BinopKind::Div,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn spow(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(Update {
-        target: lhs,
-        op: BinopKind::Pow,
-        value: rhs,
-    })
+pub fn spow<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Update(Update {
+            target: lhs,
+            op: BinopKind::Pow,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sconcat(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(Update {
-        target: lhs,
-        op: BinopKind::Concat,
-        value: rhs,
-    })
+pub fn sconcat<'a, M: NodeMeta + Default>(
+    lhs: Node<Expr<'a, M>, M>,
+    rhs: Node<Expr<'a, M>, M>,
+) -> Node<Stmt<'a, M>, M> {
+    Node::new(
+        Stmt::Update(Update {
+            target: lhs,
+            op: BinopKind::Concat,
+            value: rhs,
+        }),
+        M::default(),
+    )
 }
 
-pub fn sexpr(expr: Expr) -> Stmt {
-    Stmt::Expr(expr)
+pub fn sexpr<'a, M: NodeMeta + Default>(expr: Node<Expr<'a, M>, M>) -> Node<Stmt<'a, M>, M> {
+    Node::new(Stmt::Expr(expr), M::default())
 }

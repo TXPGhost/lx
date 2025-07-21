@@ -1,42 +1,44 @@
 pub mod helpers;
 pub mod pretty_print;
 
+use crate::node::*;
+
 use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Struct {
-    pub fields: Vec<Field>,
+pub struct Struct<'a, M: NodeMeta> {
+    pub fields: Vec<Node<Field<'a, M>, M>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Args {
-    pub args: Vec<Arg>,
+pub struct Args<'a, M: NodeMeta> {
+    pub args: Vec<Node<Arg<'a, M>, M>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Field {
-    Field(Ident, Expr),
-    Inline(Expr),
+pub enum Field<'a, M: NodeMeta> {
+    Field(Ident, Node<Expr<'a, M>, M>),
+    Inline(Expr<'a, M>),
     Spacer,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Named {
+pub struct NamedArg<'a, M: NodeMeta> {
     pub is_mut: bool,
     pub name: Ident,
-    pub value: Expr,
+    pub value: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ArgIdent {
+pub struct IdentArg {
     pub is_mut: bool,
     pub name: Ident,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Arg {
-    Named(Named),
-    Ident(ArgIdent),
+pub enum Arg<'a, M: NodeMeta> {
+    Named(NamedArg<'a, M>),
+    Ident(IdentArg),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -48,79 +50,79 @@ pub struct Ident {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Expr {
+pub enum Expr<'a, M: NodeMeta> {
     Ident(Ident),
     Prim(Prim),
-    Struct(Struct),
-    Block(Block),
-    Binop(Binop),
-    Func(Func),
-    Call(Call),
-    Constructor(Constructor),
-    Project(Project),
+    Struct(Struct<'a, M>),
+    Block(Block<'a, M>),
+    Binop(Binop<'a, M>),
+    Func(Func<'a, M>),
+    Call(Call<'a, M>),
+    Constructor(Constructor<'a, M>),
+    Project(Project<'a, M>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Binop {
-    pub left: Box<Expr>,
+pub struct Binop<'a, M: NodeMeta> {
+    pub left: Node<Expr<'a, M>, M>,
     pub op: BinopKind,
-    pub right: Box<Expr>,
+    pub right: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Constructor {
+pub struct Constructor<'a, M: NodeMeta> {
     pub name: Ident,
-    pub fields: Struct,
+    pub fields: Struct<'a, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Project {
-    pub expr: Box<Expr>,
+pub struct Project<'a, M: NodeMeta> {
+    pub expr: Node<Expr<'a, M>, M>,
     pub field: Ident,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Func {
-    pub args: Args,
-    pub body: Box<Expr>,
+pub struct Func<'a, M: NodeMeta> {
+    pub args: Args<'a, M>,
+    pub body: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Call {
-    pub func: Box<Expr>,
-    pub args: Vec<Expr>,
+pub struct Call<'a, M: NodeMeta> {
+    pub func: Node<Expr<'a, M>, M>,
+    pub args: Vec<Node<Expr<'a, M>, M>>,
     pub method_syntax: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Block {
-    pub stmts: Vec<Stmt>,
+pub struct Block<'a, M: NodeMeta> {
+    pub stmts: Vec<Node<Stmt<'a, M>, M>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Bind {
+pub struct Bind<'a, M: NodeMeta> {
     pub name: Ident,
-    pub value: Expr,
+    pub value: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BindMut {
+pub struct BindMut<'a, M: NodeMeta> {
     pub name: Ident,
-    pub initial: Expr,
-    pub update: Expr,
+    pub initial: Node<Expr<'a, M>, M>,
+    pub update: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Write {
-    pub target: Expr,
-    pub value: Expr,
+pub struct Write<'a, M: NodeMeta> {
+    pub target: Node<Expr<'a, M>, M>,
+    pub value: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Update {
-    pub target: Expr,
+pub struct Update<'a, M: NodeMeta> {
+    pub target: Node<Expr<'a, M>, M>,
     pub op: BinopKind,
-    pub value: Expr,
+    pub value: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -131,12 +133,12 @@ pub enum Prim {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Stmt {
-    Bind(Bind),
-    BindMut(BindMut),
-    Write(Write),
-    Update(Update),
-    Expr(Expr),
+pub enum Stmt<'a, M: NodeMeta> {
+    Bind(Bind<'a, M>),
+    BindMut(BindMut<'a, M>),
+    Write(Write<'a, M>),
+    Update(Update<'a, M>),
+    Expr(Node<Expr<'a, M>, M>),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

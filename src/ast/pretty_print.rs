@@ -95,22 +95,31 @@ pub trait PrettyPrint {
     }
 }
 
-impl PrettyPrint for Struct {
+impl<'a, M: NodeMeta> PrettyPrint for Struct<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.fields.is_empty() {
             return ctxt.color("()", ctxt.cs.punctuation);
         }
         if self.fields.len() == 1 {
-            if let Field::Inline(expr) | Field::Field(_, expr) = &self.fields[0] {
-                let mut is_large = false;
-                if let Expr::Struct(_) | Expr::Block(_) = expr {
-                    is_large = true;
+            let field = &self.fields[0].elt.borrow();
+            let mut is_large = false;
+            match &**field {
+                Field::Inline(expr) => {
+                    if let Expr::Struct(_) | Expr::Block(_) = expr {
+                        is_large = true;
+                    }
                 }
-                if !is_large {
-                    return ctxt.color("(", ctxt.cs.punctuation)
-                        + &self.fields[0].pretty_print(ctxt)
-                        + &ctxt.color(")", ctxt.cs.punctuation);
+                Field::Field(_, expr) => {
+                    if let Expr::Struct(_) | Expr::Block(_) = &*expr.elt.borrow() {
+                        is_large = true;
+                    }
                 }
+                Field::Spacer => {}
+            }
+            if !is_large {
+                return ctxt.color("(", ctxt.cs.punctuation)
+                    + &field.pretty_print(ctxt)
+                    + &ctxt.color(")", ctxt.cs.punctuation);
             }
         }
         let mut s = String::new();
@@ -122,7 +131,7 @@ impl PrettyPrint for Struct {
             if ctxt.expand {
                 s += &ctxt.indented().indent();
             }
-            s += &self.fields[i].pretty_print(ctxt);
+            s += &self.fields[i].elt.borrow().pretty_print(ctxt);
             if ctxt.expand {
                 s += "\n";
             } else if i < self.fields.len() - 1 {
@@ -138,7 +147,7 @@ impl PrettyPrint for Struct {
     }
 }
 
-impl PrettyPrint for Args {
+impl<'a, M: NodeMeta> PrettyPrint for Args<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.args.is_empty() {
             return ctxt.color("()", ctxt.cs.operator);
@@ -146,7 +155,7 @@ impl PrettyPrint for Args {
         let mut s = String::new();
         s += &ctxt.color("(", ctxt.cs.operator);
         for i in 0..self.args.len() {
-            s += &self.args[i].pretty_print(ctxt);
+            s += &self.args[i].elt.borrow().pretty_print(ctxt);
             if i < self.args.len() - 1 {
                 s += &ctxt.color(",", ctxt.cs.punctuation);
                 s += " ";
@@ -157,11 +166,11 @@ impl PrettyPrint for Args {
     }
 }
 
-impl PrettyPrint for Field {
+impl<'a, M: NodeMeta> PrettyPrint for Field<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Field::Field(ident, expr) => {
-                if let Expr::Ident(other) = expr
+                if let Expr::Ident(other) = &*expr.elt.borrow()
                     && ident.is_type == other.is_type
                     && !ident.is_void
                     && !other.is_void
@@ -179,7 +188,7 @@ impl PrettyPrint for Field {
                     true => ctxt.style(&*ident.name, ctxt.cs.member, true, false),
                     false => ctxt.color(&*ident.name, ctxt.cs.member),
                 } + " "
-                    + &expr.pretty_print(&mut ctxt.indented()))
+                    + &expr.elt.borrow().pretty_print(&mut ctxt.indented()))
             }
             Field::Inline(expr) => {
                 ctxt.color("..", ctxt.cs.punctuation) + &expr.pretty_print(&mut ctxt.indented())
@@ -189,7 +198,7 @@ impl PrettyPrint for Field {
     }
 }
 
-impl PrettyPrint for Arg {
+impl<'a, M: NodeMeta> PrettyPrint for Arg<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Arg::Named(named) => {
@@ -200,7 +209,7 @@ impl PrettyPrint for Arg {
                         false => ctxt.style(&*named.name.name, ctxt.cs.normal, false, true),
                     }
                     + " "
-                    + &named.value.pretty_print(&mut ctxt.indented())
+                    + &named.value.elt.borrow().pretty_print(&mut ctxt.indented())
             }
             Arg::Ident(arg_ident) => {
                 ctxt.add_argument(arg_ident.name.name.as_ref().to_owned());
@@ -226,7 +235,7 @@ impl PrettyPrint for Ident {
     }
 }
 
-impl PrettyPrint for Expr {
+impl<'a, M: NodeMeta> PrettyPrint for Expr<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Expr::Ident(ident) => ident.pretty_print(ctxt),
@@ -242,9 +251,9 @@ impl PrettyPrint for Expr {
             Expr::Block(block) => block.pretty_print(ctxt),
             Expr::Binop(binop) => format!(
                 "{} {} {}",
-                binop.left.pretty_print(ctxt),
+                binop.left.elt.borrow().pretty_print(ctxt),
                 binop.op.pretty_print(ctxt),
-                binop.right.pretty_print(ctxt)
+                binop.right.elt.borrow().pretty_print(ctxt)
             ),
             Expr::Func(func) => func.pretty_print(ctxt),
             Expr::Call(call) => call.pretty_print(ctxt),
@@ -297,7 +306,7 @@ impl PrettyPrint for Prim {
     }
 }
 
-impl PrettyPrint for Block {
+impl<'a, M: NodeMeta> PrettyPrint for Block<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         if self.stmts.is_empty() {
             ctxt.color("{}", ctxt.cs.punctuation);
@@ -305,7 +314,7 @@ impl PrettyPrint for Block {
         if self.stmts.len() == 1 {
             return ctxt.color("{", ctxt.cs.punctuation)
                 + " "
-                + &self.stmts[0].pretty_print(ctxt)
+                + &self.stmts[0].elt.borrow().pretty_print(ctxt)
                 + " "
                 + &ctxt.color("}", ctxt.cs.punctuation);
         }
@@ -314,7 +323,7 @@ impl PrettyPrint for Block {
         s += "\n";
         for stmt in &self.stmts {
             s += &ctxt.indented().indent();
-            s += &stmt.pretty_print(ctxt);
+            s += &stmt.elt.borrow().pretty_print(ctxt);
             s += "\n";
         }
         s += &ctxt.indent();
@@ -336,11 +345,11 @@ impl PrettyPrint for BinopKind {
     }
 }
 
-impl PrettyPrint for Stmt {
+impl<'a, M: NodeMeta> PrettyPrint for Stmt<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
             Stmt::Bind(bind) => {
-                let expr = bind.value.pretty_print(ctxt);
+                let expr = bind.value.elt.borrow().pretty_print(ctxt);
                 ctxt.remove_argument(&bind.name.name);
                 bind.name.pretty_print(ctxt)
                     + " "
@@ -349,8 +358,8 @@ impl PrettyPrint for Stmt {
                     + &expr
             }
             Stmt::BindMut(bind_mut) => {
-                let ty = bind_mut.initial.pretty_print(ctxt);
-                let expr = bind_mut.update.pretty_print(ctxt);
+                let ty = bind_mut.initial.elt.borrow().pretty_print(ctxt);
+                let expr = bind_mut.update.elt.borrow().pretty_print(ctxt);
                 ctxt.remove_argument(&bind_mut.name.name);
                 bind_mut.name.pretty_print(ctxt)
                     + " "
@@ -361,43 +370,43 @@ impl PrettyPrint for Stmt {
                     + &expr
             }
             Stmt::Write(write) => {
-                write.target.pretty_print(ctxt)
+                write.target.elt.borrow().pretty_print(ctxt)
                     + " "
                     + &ctxt.color(":=", ctxt.cs.operator)
                     + " "
-                    + &write.value.pretty_print(ctxt)
+                    + &write.value.elt.borrow().pretty_print(ctxt)
             }
             Stmt::Update(update) => {
-                update.target.pretty_print(ctxt)
+                update.target.elt.borrow().pretty_print(ctxt)
                     + " "
                     + &update.op.pretty_print(ctxt)
                     + &ctxt.color("=", ctxt.cs.operator)
                     + " "
-                    + &update.value.pretty_print(ctxt)
+                    + &update.value.elt.borrow().pretty_print(ctxt)
             }
-            Stmt::Expr(expr) => expr.pretty_print(ctxt).to_string(),
+            Stmt::Expr(expr) => expr.elt.borrow().pretty_print(ctxt).to_string(),
         }
     }
 }
 
-impl PrettyPrint for Func {
+impl<'a, M: NodeMeta> PrettyPrint for Func<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
-        self.args.pretty_print(ctxt) + " " + &self.body.pretty_print(ctxt)
+        self.args.pretty_print(ctxt) + " " + &self.body.elt.borrow().pretty_print(ctxt)
     }
 }
 
-impl PrettyPrint for Call {
+impl<'a, M: NodeMeta> PrettyPrint for Call<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         let mut s = String::new();
         if self.method_syntax {
             assert!(!self.args.is_empty());
-            s += &self.args[0].pretty_print(ctxt);
+            s += &self.args[0].elt.borrow().pretty_print(ctxt);
             s += &ctxt.color(":", ctxt.cs.punctuation);
         }
         let mut angle_brackets = false;
-        let mut func = self.func.as_ref().clone();
+        let mut func = self.func.elt.borrow().clone();
         loop {
-            match func {
+            match &func {
                 Expr::Ident(ident) => {
                     s += &if ident.is_type {
                         angle_brackets = true;
@@ -408,13 +417,13 @@ impl PrettyPrint for Call {
                     break;
                 }
                 Expr::Project(Project { expr, field }) => {
-                    s += &expr.pretty_print(ctxt).to_string();
+                    s += &expr.elt.borrow().pretty_print(ctxt).to_string();
                     s += &ctxt.color(".", ctxt.cs.punctuation);
                     func = Expr::Ident(field.clone());
                     continue;
                 }
                 _ => {
-                    s += &self.func.pretty_print(ctxt);
+                    s += &self.func.elt.borrow().pretty_print(ctxt);
                     break;
                 }
             }
@@ -422,7 +431,7 @@ impl PrettyPrint for Call {
         s += &ctxt.color(if angle_brackets { "<" } else { "(" }, ctxt.cs.operator);
         let start_idx = if self.method_syntax { 1 } else { 0 };
         for i in start_idx..self.args.len() {
-            s += &self.args[i].pretty_print(ctxt);
+            s += &self.args[i].elt.borrow().pretty_print(ctxt);
             if i < self.args.len() - 1 {
                 s += &ctxt.color(",", ctxt.cs.punctuation);
                 s += " ";
@@ -433,9 +442,9 @@ impl PrettyPrint for Call {
     }
 }
 
-impl PrettyPrint for Project {
+impl<'a, M: NodeMeta> PrettyPrint for Project<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
-        self.expr.pretty_print(ctxt)
+        self.expr.elt.borrow().pretty_print(ctxt)
             + &ctxt.color(".", ctxt.cs.punctuation)
             + &if self.field.is_type {
                 ctxt.style(&*self.field.name, ctxt.cs.type_, true, false)

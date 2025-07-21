@@ -1,11 +1,19 @@
 use std::cell::RefCell;
+use std::fmt::Debug;
 
-pub struct Node<T, M> {
+pub trait NodeElt: Clone + Debug + PartialEq + Eq {}
+impl<T: Clone + Debug + PartialEq + Eq> NodeElt for T {}
+
+pub trait NodeMeta: NodeElt + Default {}
+impl<T: NodeElt + Default> NodeMeta for T {}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Node<T: NodeElt, M: NodeMeta> {
     pub elt: Box<RefCell<T>>,
     pub meta: Box<RefCell<M>>,
 }
 
-impl<T, M> Node<T, M> {
+impl<T: NodeElt, M: NodeMeta> Node<T, M> {
     pub fn new(elt: T, meta: M) -> Self {
         Node {
             elt: Box::new(RefCell::new(elt)),
@@ -13,14 +21,14 @@ impl<T, M> Node<T, M> {
         }
     }
 
-    pub fn meta<U>(self, meta: U) -> Node<T, U> {
+    pub fn meta<U: NodeMeta>(self, meta: U) -> Node<T, U> {
         Node {
             elt: self.elt,
             meta: Box::new(RefCell::new(meta)),
         }
     }
 
-    pub fn emap<F, U>(self, f: F) -> Node<U, M>
+    pub fn emap<F, U: NodeElt>(self, f: F) -> Node<U, M>
     where
         F: FnOnce(&T) -> U,
     {
@@ -30,7 +38,7 @@ impl<T, M> Node<T, M> {
         }
     }
 
-    pub fn mmap<F, U>(self, f: F) -> Node<T, U>
+    pub fn mmap<F, U: NodeMeta>(self, f: F) -> Node<T, U>
     where
         F: FnOnce(&M) -> U,
     {
@@ -55,11 +63,12 @@ impl<T, M> Node<T, M> {
     }
 }
 
-pub trait NodeExt: Sized {
-    fn elt(self) -> Node<Self, ()> {
-        Node::new(self, ())
+pub trait NodeExt: NodeElt + Sized {
+    fn elt<M: NodeMeta>(self) -> Node<Self, M> {
+        Node::new(self, M::default())
     }
-    fn node<M>(self, meta: M) -> Node<Self, M> {
+
+    fn node<M: NodeMeta>(self, meta: M) -> Node<Self, M> {
         Node::new(self, meta)
     }
 }
