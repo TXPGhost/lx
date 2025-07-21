@@ -15,15 +15,15 @@ pub fn estruct<'a, M: NodeMeta>(
     )
 }
 
-pub fn estring<'a, M: NodeMeta + Default>(string: impl Into<String>) -> Node<Expr<'a, M>, M> {
+pub fn estring<'a, M: NodeMeta>(string: impl Into<String>) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Prim(Prim::String(string.into())), M::default())
 }
 
-pub fn echar<'a, M: NodeMeta + Default>(char: char) -> Node<Expr<'a, M>, M> {
+pub fn echar<'a, M: NodeMeta>(char: char) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Prim(Prim::Char(char as u8)), M::default())
 }
 
-pub fn istruct<'a, M: NodeMeta + Default>(
+pub fn istruct<'a, M: NodeMeta>(
     fields: impl Into<Vec<Node<Field<'a, M>, M>>>,
 ) -> Node<Field<'a, M>, M> {
     Node::new(
@@ -34,17 +34,11 @@ pub fn istruct<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn field<'a, M: NodeMeta + Default>(
-    ident: Ident,
-    expr: Node<Expr<'a, M>, M>,
-) -> Node<Field<'a, M>, M> {
+pub fn field<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Field<'a, M>, M> {
     Node::new(Field::Field(ident, expr), M::default())
 }
 
-pub fn arg<'a, M: NodeMeta + Default>(
-    ident: Ident,
-    expr: Node<Expr<'a, M>, M>,
-) -> Node<Arg<'a, M>, M> {
+pub fn arg<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Arg<'a, M>, M> {
     Node::new(
         Arg::Named(NamedArg {
             is_mut: false,
@@ -55,10 +49,7 @@ pub fn arg<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn arg_mut<'a, M: NodeMeta + Default>(
-    ident: Ident,
-    expr: Node<Expr<'a, M>, M>,
-) -> Node<Arg<'a, M>, M> {
+pub fn arg_mut<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Arg<'a, M>, M> {
     Node::new(
         Arg::Named(NamedArg {
             is_mut: true,
@@ -69,7 +60,7 @@ pub fn arg_mut<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn aident<M: NodeMeta + Default>(ident: Ident) -> Node<Arg<'static, M>, M> {
+pub fn aident<M: NodeMeta>(ident: Ident) -> Node<Arg<'static, M>, M> {
     Node::new(
         Arg::Ident(IdentArg {
             is_mut: false,
@@ -79,7 +70,7 @@ pub fn aident<M: NodeMeta + Default>(ident: Ident) -> Node<Arg<'static, M>, M> {
     )
 }
 
-pub fn aident_mut<M: NodeMeta + Default>(ident: Ident) -> Node<Arg<'static, M>, M> {
+pub fn aident_mut<M: NodeMeta>(ident: Ident) -> Node<Arg<'static, M>, M> {
     Node::new(
         Arg::Ident(IdentArg {
             is_mut: true,
@@ -89,15 +80,15 @@ pub fn aident_mut<M: NodeMeta + Default>(ident: Ident) -> Node<Arg<'static, M>, 
     )
 }
 
-pub fn fspacer<'a, M: NodeMeta + Default>() -> Node<Field<'a, M>, M> {
+pub fn fspacer<'a, M: NodeMeta>() -> Node<Field<'a, M>, M> {
     Node::new(Field::Spacer, M::default())
 }
 
-pub fn inline<'a, M: NodeMeta + Default>(expr: Expr<'a, M>) -> Node<Field<'a, M>, M> {
+pub fn inline<'a, M: NodeMeta>(expr: Expr<'a, M>) -> Node<Field<'a, M>, M> {
     Node::new(Field::Inline(expr), M::default())
 }
 
-pub fn eident<'a, M: NodeMeta + Default>(ident: Ident) -> Node<Expr<'a, M>, M> {
+pub fn eident<'a, M: NodeMeta>(ident: Ident) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Ident(ident), M::default())
 }
 
@@ -141,19 +132,19 @@ pub fn hoist(ident: Ident, by: usize) -> Ident {
     }
 }
 
-pub fn evid<'a, M: NodeMeta + Default>(name: &'static str) -> Node<Expr<'a, M>, M> {
+pub fn evid<'a, M: NodeMeta>(name: &'static str) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Ident(vid(name)), M::default())
 }
 
-pub fn etid<'a, M: NodeMeta + Default>(name: &'static str) -> Node<Expr<'a, M>, M> {
+pub fn etid<'a, M: NodeMeta>(name: &'static str) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Ident(tid(name)), M::default())
 }
 
-pub fn ei32<'a, M: NodeMeta + Default>(n: i32) -> Node<Expr<'a, M>, M> {
+pub fn ei32<'a, M: NodeMeta>(n: i32) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Prim(Prim::I32(n)), M::default())
 }
 
-pub fn add<'a, M: NodeMeta + Default>(
+pub fn add<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
@@ -167,7 +158,7 @@ pub fn add<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sub<'a, M: NodeMeta + Default>(
+pub fn sub<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
@@ -181,7 +172,7 @@ pub fn sub<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn mul<'a, M: NodeMeta + Default>(
+pub fn mul<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
@@ -195,7 +186,7 @@ pub fn mul<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn div<'a, M: NodeMeta + Default>(
+pub fn div<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
@@ -209,7 +200,7 @@ pub fn div<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn pow<'a, M: NodeMeta + Default>(
+pub fn pow<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
@@ -223,7 +214,7 @@ pub fn pow<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn concat<'a, M: NodeMeta + Default>(
+pub fn concat<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
@@ -243,7 +234,7 @@ pub fn block<'a, M: NodeMeta>(stmts: impl Into<Vec<Node<Stmt<'a, M>, M>>>) -> Bl
     }
 }
 
-pub fn eblock<'a, M: NodeMeta + Default>(
+pub fn eblock<'a, M: NodeMeta>(
     stmts: impl Into<Vec<Node<Stmt<'a, M>, M>>>,
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
@@ -254,17 +245,14 @@ pub fn eblock<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn efunc<'a, M: NodeMeta + Default>(
+pub fn efunc<'a, M: NodeMeta>(
     args: Args<'a, M>,
     body: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Func(Func { args, body }), M::default())
 }
 
-pub fn eproj<'a, M: NodeMeta + Default>(
-    expr: Node<Expr<'a, M>, M>,
-    field: Ident,
-) -> Node<Expr<'a, M>, M> {
+pub fn eproj<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>, field: Ident) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Project(Project { expr, field }), M::default())
 }
 
@@ -279,7 +267,7 @@ pub fn call<'a, M: NodeMeta>(
     }
 }
 
-pub fn ecall<'a, M: NodeMeta + Default>(
+pub fn ecall<'a, M: NodeMeta>(
     func: Node<Expr<'a, M>, M>,
     args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
 ) -> Node<Expr<'a, M>, M> {
@@ -293,7 +281,7 @@ pub fn ecall<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn econstructor<'a, M: NodeMeta + Default>(
+pub fn econstructor<'a, M: NodeMeta>(
     ident: Ident,
     fields: impl Into<Vec<Node<Field<'a, M>, M>>>,
 ) -> Node<Expr<'a, M>, M> {
@@ -322,7 +310,7 @@ pub fn method<'a, M: NodeMeta>(
     }
 }
 
-pub fn emethod<'a, M: NodeMeta + Default>(
+pub fn emethod<'a, M: NodeMeta>(
     obj: Node<Expr<'a, M>, M>,
     func: Node<Expr<'a, M>, M>,
     args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
@@ -339,10 +327,7 @@ pub fn emethod<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sbind<'a, M: NodeMeta + Default>(
-    ident: Ident,
-    expr: Node<Expr<'a, M>, M>,
-) -> Node<Stmt<'a, M>, M> {
+pub fn sbind<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Stmt<'a, M>, M> {
     Node::new(
         Stmt::Bind(Bind {
             name: ident,
@@ -352,7 +337,7 @@ pub fn sbind<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sbindmut<'a, M: NodeMeta + Default>(
+pub fn sbindmut<'a, M: NodeMeta>(
     ident: Ident,
     ty: Node<Expr<'a, M>, M>,
     expr: Node<Expr<'a, M>, M>,
@@ -367,7 +352,7 @@ pub fn sbindmut<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn swrite<'a, M: NodeMeta + Default>(
+pub fn swrite<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -380,7 +365,7 @@ pub fn swrite<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sadd<'a, M: NodeMeta + Default>(
+pub fn sadd<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -394,7 +379,7 @@ pub fn sadd<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn ssub<'a, M: NodeMeta + Default>(
+pub fn ssub<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -408,7 +393,7 @@ pub fn ssub<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn smul<'a, M: NodeMeta + Default>(
+pub fn smul<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -422,7 +407,7 @@ pub fn smul<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sdiv<'a, M: NodeMeta + Default>(
+pub fn sdiv<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -436,7 +421,7 @@ pub fn sdiv<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn spow<'a, M: NodeMeta + Default>(
+pub fn spow<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -450,7 +435,7 @@ pub fn spow<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sconcat<'a, M: NodeMeta + Default>(
+pub fn sconcat<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Stmt<'a, M>, M> {
@@ -464,6 +449,6 @@ pub fn sconcat<'a, M: NodeMeta + Default>(
     )
 }
 
-pub fn sexpr<'a, M: NodeMeta + Default>(expr: Node<Expr<'a, M>, M>) -> Node<Stmt<'a, M>, M> {
+pub fn sexpr<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>) -> Node<Stmt<'a, M>, M> {
     Node::new(Stmt::Expr(expr), M::default())
 }
