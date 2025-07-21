@@ -1,4 +1,4 @@
-use crate::ast::{self, Binop};
+use crate::ast::{self, BinopKind};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,7 +23,7 @@ pub struct Args {
 pub enum Ident {
     VIdent(Rc<str>),
     TIdent(Rc<str>),
-    Binop(Binop),
+    Binop(BinopKind),
     Void,
 }
 
@@ -108,12 +108,12 @@ impl Ident {
     pub fn as_str(&self) -> &str {
         match self {
             Ident::VIdent(ident) | Ident::TIdent(ident) => ident.as_ref(),
-            Ident::Binop(Binop::Add) => "(+)",
-            Ident::Binop(Binop::Sub) => "(-)",
-            Ident::Binop(Binop::Mul) => "(*)",
-            Ident::Binop(Binop::Div) => "(/)",
-            Ident::Binop(Binop::Pow) => "(^)",
-            Ident::Binop(Binop::Concat) => "(++)",
+            Ident::Binop(BinopKind::Add) => "(+)",
+            Ident::Binop(BinopKind::Sub) => "(-)",
+            Ident::Binop(BinopKind::Mul) => "(*)",
+            Ident::Binop(BinopKind::Div) => "(/)",
+            Ident::Binop(BinopKind::Pow) => "(^)",
+            Ident::Binop(BinopKind::Concat) => "(++)",
             Ident::Void => "_",
         }
     }

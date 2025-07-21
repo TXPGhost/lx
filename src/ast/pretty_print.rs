@@ -240,23 +240,23 @@ impl PrettyPrint for Expr {
                 }
             }
             Expr::Block(block) => block.pretty_print(ctxt),
-            Expr::Binop(lhs, op, rhs) => format!(
+            Expr::Binop(binop) => format!(
                 "{} {} {}",
-                lhs.pretty_print(ctxt),
-                op.pretty_print(ctxt),
-                rhs.pretty_print(ctxt)
+                binop.left.pretty_print(ctxt),
+                binop.op.pretty_print(ctxt),
+                binop.right.pretty_print(ctxt)
             ),
             Expr::Func(func) => func.pretty_print(ctxt),
             Expr::Call(call) => call.pretty_print(ctxt),
-            Expr::Constructor(ident, constructor) => {
-                let res = constructor.pretty_print(&mut ctxt.with_expand(false).with_colors(false));
+            Expr::Constructor(constructor) => {
+                let res = constructor.fields.pretty_print(&mut ctxt.with_expand(false).with_colors(false));
                 let res =
                     if res.lines().map(|s| s.chars().count()).max().unwrap_or(0) > ctxt.max_width {
-                        constructor.pretty_print(&mut ctxt.with_expand(true))
+                        constructor.fields.pretty_print(&mut ctxt.with_expand(true))
                     } else {
-                        constructor.pretty_print(&mut ctxt.with_expand(false))
+                        constructor.fields.pretty_print(&mut ctxt.with_expand(false))
                     };
-                format!("{}{}", ident.pretty_print(ctxt), res)
+                format!("{}{}", constructor.name.pretty_print(ctxt), res)
             }
             Expr::Project(project) => project.pretty_print(ctxt),
         }
@@ -319,15 +319,15 @@ impl PrettyPrint for Block {
     }
 }
 
-impl PrettyPrint for Binop {
+impl PrettyPrint for BinopKind {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
-            Binop::Add => ctxt.color("+", ctxt.cs.operator),
-            Binop::Sub => ctxt.color("-", ctxt.cs.operator),
-            Binop::Mul => ctxt.color("*", ctxt.cs.operator),
-            Binop::Div => ctxt.color("/", ctxt.cs.operator),
-            Binop::Pow => ctxt.color("^", ctxt.cs.operator),
-            Binop::Concat => ctxt.color("++", ctxt.cs.operator),
+            BinopKind::Add => ctxt.color("+", ctxt.cs.operator),
+            BinopKind::Sub => ctxt.color("-", ctxt.cs.operator),
+            BinopKind::Mul => ctxt.color("*", ctxt.cs.operator),
+            BinopKind::Div => ctxt.color("/", ctxt.cs.operator),
+            BinopKind::Pow => ctxt.color("^", ctxt.cs.operator),
+            BinopKind::Concat => ctxt.color("++", ctxt.cs.operator),
         }
     }
 }
@@ -335,16 +335,16 @@ impl PrettyPrint for Binop {
 impl PrettyPrint for Stmt {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
-            Stmt::Bind(ident, expr) => {
-                let expr = expr.pretty_print(ctxt);
-                ctxt.remove_argument(&ident.name);
-                ident.pretty_print(ctxt) + " " + &ctxt.color("=", ctxt.cs.operator) + " " + &expr
+            Stmt::Bind(bind) => {
+                let expr = bind.value.pretty_print(ctxt);
+                ctxt.remove_argument(&bind.name.name);
+                bind.name.pretty_print(ctxt) + " " + &ctxt.color("=", ctxt.cs.operator) + " " + &expr
             }
-            Stmt::BindMut(ident, ty, expr) => {
-                let ty = ty.pretty_print(ctxt);
-                let expr = expr.pretty_print(ctxt);
-                ctxt.remove_argument(&ident.name);
-                ident.pretty_print(ctxt)
+            Stmt::BindMut(bind_mut) => {
+                let ty = bind_mut.initial.pretty_print(ctxt);
+                let expr = bind_mut.update.pretty_print(ctxt);
+                ctxt.remove_argument(&bind_mut.name.name);
+                bind_mut.name.pretty_print(ctxt)
                     + " "
                     + &ty
                     + " "
@@ -352,20 +352,20 @@ impl PrettyPrint for Stmt {
                     + " "
                     + &expr
             }
-            Stmt::Write(ident, expr) => {
-                ident.pretty_print(ctxt)
+            Stmt::Write(write) => {
+                write.target.pretty_print(ctxt)
                     + " "
                     + &ctxt.color(":=", ctxt.cs.operator)
                     + " "
-                    + &expr.pretty_print(ctxt)
+                    + &write.value.pretty_print(ctxt)
             }
-            Stmt::Update(ident, binop, expr) => {
-                ident.pretty_print(ctxt)
+            Stmt::Update(update) => {
+                update.target.pretty_print(ctxt)
                     + " "
-                    + &binop.pretty_print(ctxt)
+                    + &update.op.pretty_print(ctxt)
                     + &ctxt.color("=", ctxt.cs.operator)
                     + " "
-                    + &expr.pretty_print(ctxt)
+                    + &update.value.pretty_print(ctxt)
             }
             Stmt::Expr(expr) => expr.pretty_print(ctxt).to_string(),
         }

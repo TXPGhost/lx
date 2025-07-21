@@ -1,0 +1,34 @@
+-- dynamic dispatch
+Dyn<T> (
+	self ()
+	..T<self>
+)
+as_dyn<T>(self ()) Dyn<T>(self)
+
+ToString<Self> (
+	to_string(self Self) String
+)
+
+Vector3 (
+	x F32
+	y F32
+	z F32
+
+	new(x F32, y F32, z F32) Vector3(x, y, z)
+
+	len_sq(self Vector3) self.x^2 + self.y^2 + self.z^2
+	len(self Vector3) self:len_sq():sqrt()
+)
+
+ToString<Self Vector3> (
+	to_string(self Self) "({self.x}, {self.y}, {self.z})"
+)
+
+print_anything(value Dyn<ToString>) {
+	println(value.to_string(value.self))
+}
+
+main() {
+	my_vec = Vector3.new(1.0, 2.0, 3.0)
+	print_anything(my_vec:as_dyn<ToString>()))
+}

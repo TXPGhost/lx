@@ -109,27 +109,51 @@ pub fn ei32(n: i32) -> Expr {
 }
 
 pub fn add(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Box::new(lhs), Binop::Add, Box::new(rhs))
+    Expr::Binop(Binop {
+        left: Box::new(lhs),
+        op: BinopKind::Add,
+        right: Box::new(rhs),
+    })
 }
 
 pub fn sub(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Box::new(lhs), Binop::Sub, Box::new(rhs))
+    Expr::Binop(Binop {
+        left: Box::new(lhs),
+        op: BinopKind::Sub,
+        right: Box::new(rhs),
+    })
 }
 
 pub fn mul(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Box::new(lhs), Binop::Mul, Box::new(rhs))
+    Expr::Binop(Binop {
+        left: Box::new(lhs),
+        op: BinopKind::Mul,
+        right: Box::new(rhs),
+    })
 }
 
 pub fn div(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Box::new(lhs), Binop::Div, Box::new(rhs))
+    Expr::Binop(Binop {
+        left: Box::new(lhs),
+        op: BinopKind::Div,
+        right: Box::new(rhs),
+    })
 }
 
 pub fn pow(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Box::new(lhs), Binop::Pow, Box::new(rhs))
+    Expr::Binop(Binop {
+        left: Box::new(lhs),
+        op: BinopKind::Pow,
+        right: Box::new(rhs),
+    })
 }
 
 pub fn concat(lhs: Expr, rhs: Expr) -> Expr {
-    Expr::Binop(Box::new(lhs), Binop::Concat, Box::new(rhs))
+    Expr::Binop(Binop {
+        left: Box::new(lhs),
+        op: BinopKind::Concat,
+        right: Box::new(rhs),
+    })
 }
 
 pub fn block(stmts: impl Into<Vec<Stmt>>) -> Block {
@@ -175,12 +199,12 @@ pub fn ecall(func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
 }
 
 pub fn econstructor(ident: Ident, fields: impl Into<Vec<Field>>) -> Expr {
-    Expr::Constructor(
-        ident,
-        Struct {
+    Expr::Constructor(Constructor {
+        name: ident,
+        fields: Struct {
             fields: fields.into(),
         },
-    )
+    })
 }
 
 pub fn method(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Call {
@@ -204,39 +228,73 @@ pub fn emethod(obj: Expr, func: Expr, args: impl Into<Vec<Expr>>) -> Expr {
 }
 
 pub fn sbind(ident: Ident, expr: Expr) -> Stmt {
-    Stmt::Bind(ident, expr)
+    Stmt::Bind(Bind {
+        name: ident,
+        value: expr,
+    })
 }
 
 pub fn sbindmut(ident: Ident, ty: Expr, expr: Expr) -> Stmt {
-    Stmt::BindMut(ident, ty, expr)
+    Stmt::BindMut(BindMut {
+        name: ident,
+        initial: ty,
+        update: expr,
+    })
 }
 
 pub fn swrite(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Write(lhs, rhs)
+    Stmt::Write(Write {
+        target: lhs,
+        value: rhs,
+    })
 }
 
 pub fn sadd(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(lhs, Binop::Add, rhs)
+    Stmt::Update(Update {
+        target: lhs,
+        op: BinopKind::Add,
+        value: rhs,
+    })
 }
 
 pub fn ssub(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(lhs, Binop::Sub, rhs)
+    Stmt::Update(Update {
+        target: lhs,
+        op: BinopKind::Sub,
+        value: rhs,
+    })
 }
 
 pub fn smul(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(lhs, Binop::Mul, rhs)
+    Stmt::Update(Update {
+        target: lhs,
+        op: BinopKind::Mul,
+        value: rhs,
+    })
 }
 
 pub fn sdiv(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(lhs, Binop::Div, rhs)
+    Stmt::Update(Update {
+        target: lhs,
+        op: BinopKind::Div,
+        value: rhs,
+    })
 }
 
 pub fn spow(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(lhs, Binop::Pow, rhs)
+    Stmt::Update(Update {
+        target: lhs,
+        op: BinopKind::Pow,
+        value: rhs,
+    })
 }
 
 pub fn sconcat(lhs: Expr, rhs: Expr) -> Stmt {
-    Stmt::Update(lhs, Binop::Concat, rhs)
+    Stmt::Update(Update {
+        target: lhs,
+        op: BinopKind::Concat,
+        value: rhs,
+    })
 }
 
 pub fn sexpr(expr: Expr) -> Stmt {

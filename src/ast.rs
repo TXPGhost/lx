@@ -3,8 +3,6 @@ pub mod pretty_print;
 
 use std::rc::Rc;
 
-use crate::ir::Prim;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
     pub fields: Vec<Field>,
@@ -42,11 +40,24 @@ pub enum Expr {
     Prim(Prim),
     Struct(Struct),
     Block(Block),
-    Binop(Box<Expr>, Binop, Box<Expr>),
+    Binop(Binop),
     Func(Func),
     Call(Call),
-    Constructor(Ident, Struct),
+    Constructor(Constructor),
     Project(Project),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Binop {
+    pub left: Box<Expr>,
+    pub op: BinopKind,
+    pub right: Box<Expr>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Constructor {
+    pub name: Ident,
+    pub fields: Struct,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -74,16 +85,49 @@ pub struct Block {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Bind {
+    pub name: Ident,
+    pub value: Expr,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BindMut {
+    pub name: Ident,
+    pub initial: Expr,
+    pub update: Expr,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Write {
+    pub target: Expr,
+    pub value: Expr,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Update {
+    pub target: Expr,
+    pub op: BinopKind,
+    pub value: Expr,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Prim {
+    I32(i32),
+    String(String),
+    Char(u8),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Stmt {
-    Bind(Ident, Expr),
-    BindMut(Ident, Expr, Expr),
-    Write(Expr, Expr),
-    Update(Expr, Binop, Expr),
+    Bind(Bind),
+    BindMut(BindMut),
+    Write(Write),
+    Update(Update),
     Expr(Expr),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Binop {
+pub enum BinopKind {
     Add,
     Sub,
     Mul,
