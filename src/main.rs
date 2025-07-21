@@ -1,19 +1,17 @@
 pub mod ast;
 pub mod colorscheme;
 // pub mod eval;
-// pub mod ir;
+pub mod ir;
 pub mod node;
 // pub mod subtype;
 
 use ast::helpers::*;
 // use ir::IntoIr;
 
-use crate::ast::Expr;
 use crate::ast::pretty_print::PrettyPrint;
-use crate::node::*;
 
 fn main() {
-    let ast: Node<Expr<()>, ()> = estruct([
+    let ast = estruct::<()>([
         field(
             tid("Vector3"),
             estruct([
