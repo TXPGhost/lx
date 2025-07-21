@@ -179,23 +179,26 @@ impl IntoIr for ast::Args {
         let mut args = HashMap::new();
         for arg in self.args {
             match arg {
-                ast::Arg::Named(is_mut, ident, expr) => {
-                    let name = ident.name.clone();
+                ast::Arg::Named(named) => {
+                    let name = named.name.name.clone();
                     if args
                         .insert(
-                            ident.into_ir(ctxt.clone())?,
-                            (is_mut, expr.into_ir(ctxt.clone())?),
+                            named.name.into_ir(ctxt.clone())?,
+                            (&named.is_mut, named.value.into_ir(ctxt.clone())?),
                         )
                         .is_some()
                     {
                         return Err(format!("duplicate argument {name}"));
                     }
                 }
-                ast::Arg::Ident(is_mut, ident) => {
-                    if ident.is_type {
+                ast::Arg::Ident(arg_ident) => {
+                    if arg_ident.name.is_type {
                         args.insert(
                             Ident::Void,
-                            (is_mut, Expr::Ident(ident.into_ir(ctxt.clone())?)),
+                            (
+                                &arg_ident.is_mut,
+                                Expr::Ident(arg_ident.name.into_ir(ctxt.clone())?),
+                            ),
                         );
                     } else {
                         panic!("not yet implemented")

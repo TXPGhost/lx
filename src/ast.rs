@@ -21,9 +21,22 @@ pub enum Field {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Named {
+    pub is_mut: bool,
+    pub name: Ident,
+    pub value: Expr,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArgIdent {
+    pub is_mut: bool,
+    pub name: Ident,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Arg {
-    Named(bool, Ident, Expr),
-    Ident(bool, Ident),
+    Named(Named),
+    Ident(ArgIdent),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

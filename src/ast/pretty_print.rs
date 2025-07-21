@@ -192,22 +192,22 @@ impl PrettyPrint for Field {
 impl PrettyPrint for Arg {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
-            Arg::Named(is_mut, ident, expr) => {
-                ctxt.add_argument(ident.name.as_ref().to_owned());
-                ctxt.color(if *is_mut { "&" } else { "" }, ctxt.cs.punctuation)
-                    + &match ident.is_type {
-                        true => ctxt.style(&*ident.name, ctxt.cs.normal, true, true),
-                        false => ctxt.style(&*ident.name, ctxt.cs.normal, false, true),
+            Arg::Named(named) => {
+                ctxt.add_argument(named.name.name.as_ref().to_owned());
+                ctxt.color(if named.is_mut { "&" } else { "" }, ctxt.cs.punctuation)
+                    + &match named.name.is_type {
+                        true => ctxt.style(&*named.name.name, ctxt.cs.normal, true, true),
+                        false => ctxt.style(&*named.name.name, ctxt.cs.normal, false, true),
                     }
                     + " "
-                    + &expr.pretty_print(&mut ctxt.indented())
+                    + &named.value.pretty_print(&mut ctxt.indented())
             }
-            Arg::Ident(is_mut, ident) => {
-                ctxt.add_argument(ident.name.as_ref().to_owned());
-                ctxt.color(if *is_mut { "&" } else { "" }, ctxt.cs.punctuation)
-                    + &match ident.is_type {
-                        true => ctxt.style(&*ident.name, ctxt.cs.type_, true, false),
-                        false => ctxt.style(&*ident.name, ctxt.cs.normal, false, true),
+            Arg::Ident(arg_ident) => {
+                ctxt.add_argument(arg_ident.name.name.as_ref().to_owned());
+                ctxt.color(if arg_ident.is_mut { "&" } else { "" }, ctxt.cs.punctuation)
+                    + &match arg_ident.name.is_type {
+                        true => ctxt.style(&*arg_ident.name.name, ctxt.cs.type_, true, false),
+                        false => ctxt.style(&*arg_ident.name.name, ctxt.cs.normal, false, true),
                     }
             }
         }
@@ -249,12 +249,16 @@ impl PrettyPrint for Expr {
             Expr::Func(func) => func.pretty_print(ctxt),
             Expr::Call(call) => call.pretty_print(ctxt),
             Expr::Constructor(constructor) => {
-                let res = constructor.fields.pretty_print(&mut ctxt.with_expand(false).with_colors(false));
+                let res = constructor
+                    .fields
+                    .pretty_print(&mut ctxt.with_expand(false).with_colors(false));
                 let res =
                     if res.lines().map(|s| s.chars().count()).max().unwrap_or(0) > ctxt.max_width {
                         constructor.fields.pretty_print(&mut ctxt.with_expand(true))
                     } else {
-                        constructor.fields.pretty_print(&mut ctxt.with_expand(false))
+                        constructor
+                            .fields
+                            .pretty_print(&mut ctxt.with_expand(false))
                     };
                 format!("{}{}", constructor.name.pretty_print(ctxt), res)
             }
@@ -338,7 +342,11 @@ impl PrettyPrint for Stmt {
             Stmt::Bind(bind) => {
                 let expr = bind.value.pretty_print(ctxt);
                 ctxt.remove_argument(&bind.name.name);
-                bind.name.pretty_print(ctxt) + " " + &ctxt.color("=", ctxt.cs.operator) + " " + &expr
+                bind.name.pretty_print(ctxt)
+                    + " "
+                    + &ctxt.color("=", ctxt.cs.operator)
+                    + " "
+                    + &expr
             }
             Stmt::BindMut(bind_mut) => {
                 let ty = bind_mut.initial.pretty_print(ctxt);

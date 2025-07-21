@@ -29,19 +29,33 @@ pub fn field(ident: Ident, expr: Expr) -> Field {
 }
 
 pub fn arg(ident: Ident, expr: Expr) -> Arg {
-    Arg::Named(false, ident, expr)
+    Arg::Named(Named {
+        is_mut: false,
+        name: ident,
+        value: expr,
+    })
 }
 
 pub fn arg_mut(ident: Ident, expr: Expr) -> Arg {
-    Arg::Named(true, ident, expr)
+    Arg::Named(Named {
+        is_mut: true,
+        name: ident,
+        value: expr,
+    })
 }
 
 pub fn aident(ident: Ident) -> Arg {
-    Arg::Ident(false, ident)
+    Arg::Ident(ArgIdent {
+        is_mut: false,
+        name: ident,
+    })
 }
 
 pub fn aident_mut(ident: Ident) -> Arg {
-    Arg::Ident(true, ident)
+    Arg::Ident(ArgIdent {
+        is_mut: true,
+        name: ident,
+    })
 }
 
 pub fn fspacer() -> Field {
