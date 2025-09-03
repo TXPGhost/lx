@@ -144,15 +144,35 @@ pub fn ei32<'a, M: NodeMeta>(n: i32) -> Node<Expr<'a, M>, M> {
     Node::new(Expr::Prim(Prim::I32(n)), M::default())
 }
 
+pub fn copy<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Unop(Unop {
+            op: UnopKind::Copy,
+            expr,
+        }),
+        M::default(),
+    )
+}
+
+pub fn neg<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Unop(Unop {
+            op: UnopKind::Neg,
+            expr,
+        }),
+        M::default(),
+    )
+}
+
 pub fn add<'a, M: NodeMeta>(
     lhs: Node<Expr<'a, M>, M>,
     rhs: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Binop(Binop {
-            left: lhs,
+            lhs,
             op: BinopKind::Add,
-            right: rhs,
+            rhs,
         }),
         M::default(),
     )
@@ -164,9 +184,9 @@ pub fn sub<'a, M: NodeMeta>(
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Binop(Binop {
-            left: lhs,
+            lhs,
             op: BinopKind::Sub,
-            right: rhs,
+            rhs,
         }),
         M::default(),
     )
@@ -178,9 +198,9 @@ pub fn mul<'a, M: NodeMeta>(
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Binop(Binop {
-            left: lhs,
+            lhs,
             op: BinopKind::Mul,
-            right: rhs,
+            rhs,
         }),
         M::default(),
     )
@@ -192,9 +212,9 @@ pub fn div<'a, M: NodeMeta>(
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Binop(Binop {
-            left: lhs,
+            lhs,
             op: BinopKind::Div,
-            right: rhs,
+            rhs,
         }),
         M::default(),
     )
@@ -206,9 +226,9 @@ pub fn pow<'a, M: NodeMeta>(
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Binop(Binop {
-            left: lhs,
+            lhs,
             op: BinopKind::Pow,
-            right: rhs,
+            rhs,
         }),
         M::default(),
     )
@@ -220,9 +240,9 @@ pub fn concat<'a, M: NodeMeta>(
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Binop(Binop {
-            left: lhs,
+            lhs,
             op: BinopKind::Concat,
-            right: rhs,
+            rhs,
         }),
         M::default(),
     )
@@ -447,6 +467,10 @@ pub fn sconcat<'a, M: NodeMeta>(
         }),
         M::default(),
     )
+}
+
+pub fn sspacer<'a, M: NodeMeta>() -> Node<Stmt<'a, M>, M> {
+    Node::new(Stmt::Spacer, M::default())
 }
 
 pub fn sexpr<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>) -> Node<Stmt<'a, M>, M> {

@@ -16,7 +16,7 @@ pub struct Colorscheme {
 
 impl Default for Colorscheme {
     fn default() -> Self {
-        Self::PASTEL
+        Self::RASMUS
     }
 }
 
@@ -28,6 +28,8 @@ impl Colorscheme {
             ("ocean".into(), Self::OCEAN),
             ("evil".into(), Self::EVIL),
             ("pastel".into(), Self::PASTEL),
+            ("rose".into(), Self::ROSE),
+            ("rasmus".into(), Self::RASMUS),
         ])
     }
 
@@ -211,6 +213,94 @@ impl Colorscheme {
             r: 216,
             g: 161,
             b: 71,
+        },
+    };
+
+    // inspired by https://vimcolorschemes.com/water-sucks/darkrose.nvim
+    pub const ROSE: Self = Self {
+        normal: Color::TrueColor {
+            r: 199,
+            g: 193,
+            b: 200,
+        },
+        member: Color::TrueColor {
+            r: 140,
+            g: 149,
+            b: 161,
+        },
+        type_: Color::TrueColor {
+            r: 150,
+            g: 160,
+            b: 173,
+        },
+        function: Color::TrueColor {
+            r: 173,
+            g: 113,
+            b: 122,
+        },
+        constant: Color::TrueColor {
+            r: 147,
+            g: 71,
+            b: 70,
+        },
+        operator: Color::TrueColor {
+            r: 139,
+            g: 139,
+            b: 139,
+        },
+        punctuation: Color::TrueColor {
+            r: 100,
+            g: 100,
+            b: 100,
+        },
+        string: Color::TrueColor {
+            r: 154,
+            g: 110,
+            b: 63,
+        },
+    };
+
+    // inspired by https://vimcolorschemes.com/kvrohit/rasmus.nvim
+    pub const RASMUS: Self = Self {
+        normal: Color::TrueColor {
+            r: 209,
+            g: 209,
+            b: 209,
+        },
+        member: Color::TrueColor {
+            r: 179,
+            g: 194,
+            b: 209,
+        },
+        type_: Color::TrueColor {
+            r: 238,
+            g: 168,
+            b: 107,
+        },
+        function: Color::TrueColor {
+            r: 246,
+            g: 198,
+            b: 153,
+        },
+        constant: Color::TrueColor {
+            r: 134,
+            g: 175,
+            b: 154,
+        },
+        operator: Color::TrueColor {
+            r: 182,
+            g: 182,
+            b: 181,
+        },
+        punctuation: Color::TrueColor {
+            r: 142,
+            g: 142,
+            b: 141,
+        },
+        string: Color::TrueColor {
+            r: 134,
+            g: 175,
+            b: 154,
         },
     };
 }

@@ -187,8 +187,11 @@ impl<'a, M: NodeMeta> PrettyPrint for Field<'a, M> {
                 (match ident.is_type {
                     true => ctxt.style(&*ident.name, ctxt.cs.member, true, false),
                     false => ctxt.color(&*ident.name, ctxt.cs.member),
-                } + " "
-                    + &expr.elt.borrow().pretty_print(&mut ctxt.indented()))
+                } + (if let Expr::Func(_) = *expr.elt.borrow() {
+                    ""
+                } else {
+                    " "
+                }) + &expr.elt.borrow().pretty_print(&mut ctxt.indented()))
             }
             Field::Inline(expr) => {
                 ctxt.color("..", ctxt.cs.punctuation) + &expr.pretty_print(&mut ctxt.indented())
@@ -225,7 +228,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Arg<'a, M> {
 
 impl PrettyPrint for Ident {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
-        ctxt.color("&".repeat(self.nhoist), ctxt.cs.punctuation)
+        ctxt.color("^".repeat(self.nhoist), ctxt.cs.punctuation)
             + &match (self.is_type, ctxt.is_argument(&self.name)) {
                 (true, true) => ctxt.style(&*self.name, ctxt.cs.type_, true, true),
                 (true, false) => ctxt.style(&*self.name, ctxt.cs.type_, true, false),
@@ -249,11 +252,16 @@ impl<'a, M: NodeMeta> PrettyPrint for Expr<'a, M> {
                 }
             }
             Expr::Block(block) => block.pretty_print(ctxt),
+            Expr::Unop(unop) => format!(
+                "{}{}",
+                unop.op.pretty_print(ctxt),
+                unop.expr.elt.borrow().pretty_print(ctxt)
+            ),
             Expr::Binop(binop) => format!(
                 "{} {} {}",
-                binop.left.elt.borrow().pretty_print(ctxt),
+                binop.lhs.elt.borrow().pretty_print(ctxt),
                 binop.op.pretty_print(ctxt),
-                binop.right.elt.borrow().pretty_print(ctxt)
+                binop.rhs.elt.borrow().pretty_print(ctxt)
             ),
             Expr::Func(func) => func.pretty_print(ctxt),
             Expr::Call(call) => call.pretty_print(ctxt),
@@ -269,7 +277,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Expr<'a, M> {
                             .fields
                             .pretty_print(&mut ctxt.with_expand(false))
                     };
-                format!("{}{}", constructor.name.pretty_print(ctxt), res)
+                ctxt.color("..", ctxt.cs.punctuation) + &constructor.name.pretty_print(ctxt) + &res
             }
             Expr::Project(project) => project.pretty_print(ctxt),
         }
@@ -332,6 +340,15 @@ impl<'a, M: NodeMeta> PrettyPrint for Block<'a, M> {
     }
 }
 
+impl PrettyPrint for UnopKind {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
+        match self {
+            UnopKind::Copy => ctxt.color("+", ctxt.cs.operator),
+            UnopKind::Neg => ctxt.color("-", ctxt.cs.operator),
+        }
+    }
+}
+
 impl PrettyPrint for BinopKind {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         match self {
@@ -385,6 +402,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Stmt<'a, M> {
                     + &update.value.elt.borrow().pretty_print(ctxt)
             }
             Stmt::Expr(expr) => expr.elt.borrow().pretty_print(ctxt).to_string(),
+            Stmt::Spacer => "".to_owned(),
         }
     }
 }
@@ -403,13 +421,11 @@ impl<'a, M: NodeMeta> PrettyPrint for Call<'a, M> {
             s += &self.args[0].elt.borrow().pretty_print(ctxt);
             s += &ctxt.color(":", ctxt.cs.punctuation);
         }
-        let mut angle_brackets = false;
         let mut func = self.func.elt.borrow().clone();
         loop {
             match &func {
                 Expr::Ident(ident) => {
                     s += &if ident.is_type {
-                        angle_brackets = true;
                         ctxt.style(&*ident.name, ctxt.cs.type_, true, false)
                     } else {
                         ctxt.color(&*ident.name, ctxt.cs.function)
@@ -428,7 +444,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Call<'a, M> {
                 }
             }
         }
-        s += &ctxt.color(if angle_brackets { "<" } else { "(" }, ctxt.cs.operator);
+        s += &ctxt.color("(", ctxt.cs.operator);
         let start_idx = if self.method_syntax { 1 } else { 0 };
         for i in start_idx..self.args.len() {
             s += &self.args[i].elt.borrow().pretty_print(ctxt);
@@ -437,7 +453,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Call<'a, M> {
                 s += " ";
             }
         }
-        s += &ctxt.color(if angle_brackets { ">" } else { ")" }, ctxt.cs.operator);
+        s += &ctxt.color(")", ctxt.cs.operator);
         s
     }
 }

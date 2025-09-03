@@ -21,55 +21,20 @@ fn main() {
                 fspacer(),
                 field(
                     vid("zero"),
-                    econstructor(
-                        tid("Vector3"),
-                        [
-                            field(vid("x"), ei32(0)),
-                            field(vid("y"), ei32(0)),
-                            field(vid("z"), ei32(0)),
-                        ],
-                    ),
+                    ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(0)]),
                 ),
                 fspacer(),
                 field(
                     vid("unit_x"),
-                    ecall(
-                        eproj(etid("Vector3"), vid("new")),
-                        [ei32(1), ei32(0), ei32(0)],
-                    ),
+                    ecall(etid("Vector3"), [ei32(1), ei32(0), ei32(0)]),
                 ),
                 field(
                     vid("unit_y"),
-                    ecall(
-                        eproj(etid("Vector3"), vid("new")),
-                        [ei32(0), ei32(1), ei32(0)],
-                    ),
+                    ecall(etid("Vector3"), [ei32(0), ei32(1), ei32(0)]),
                 ),
                 field(
                     vid("unit_z"),
-                    ecall(
-                        eproj(etid("Vector3"), vid("new")),
-                        [ei32(0), ei32(0), ei32(1)],
-                    ),
-                ),
-                fspacer(),
-                field(
-                    vid("new"),
-                    efunc(
-                        args([
-                            arg(vid("x"), etid("I32")),
-                            arg(vid("y"), etid("I32")),
-                            arg(vid("z"), etid("I32")),
-                        ]),
-                        econstructor(
-                            tid("Vector3"),
-                            [
-                                field(vid("x"), eident(hoist(vid("x"), 1))),
-                                field(vid("y"), eident(hoist(vid("y"), 1))),
-                                field(vid("z"), eident(hoist(vid("z"), 1))),
-                            ],
-                        ),
-                    ),
+                    ecall(etid("Vector3"), [ei32(0), ei32(0), ei32(1)]),
                 ),
                 fspacer(),
                 field(
@@ -101,7 +66,7 @@ fn main() {
                             arg(vid("rhs"), etid("Vector3")),
                         ]),
                         ecall(
-                            eproj(etid("Vector3"), vid("new")),
+                            etid("Vector3"),
                             [
                                 add(eproj(evid("lhs"), vid("x")), eproj(evid("rhs"), vid("x"))),
                                 add(eproj(evid("lhs"), vid("y")), eproj(evid("rhs"), vid("y"))),
@@ -159,17 +124,11 @@ fn main() {
                 eblock([
                     sbind(
                         vid("vec_a"),
-                        ecall(
-                            eproj(etid("Vector3"), vid("new")),
-                            [ei32(1), ei32(2), ei32(3)],
-                        ),
+                        ecall(etid("Vector3"), [ei32(1), ei32(2), ei32(3)]),
                     ),
                     sbind(
                         vid("vec_b"),
-                        ecall(
-                            eproj(etid("Vector3"), vid("new")),
-                            [ei32(4), ei32(5), ei32(6)],
-                        ),
+                        ecall(etid("Vector3"), [ei32(4), ei32(5), ei32(6)]),
                     ),
                     sbind(
                         vid("vec_c"),
@@ -178,11 +137,22 @@ fn main() {
                             [evid("vec_a"), evid("vec_b")],
                         ),
                     ),
+                    sspacer(),
                     sexpr(emethod(
                         evid("io"),
                         evid("println"),
                         [emethod(evid("vec_c"), evid("to_string"), [])],
                     )),
+                    sspacer(),
+                    sbind(
+                        vid("x"),
+                        ecall(eproj(etid("Cow"), tid("Owned")), [estring("Hello, world!")]),
+                    ),
+                    sspacer(),
+                    sbind(vid("y"), copy(evid("x"))),
+                    sbind(vid("z"), copy(evid("x"))),
+                    sspacer(),
+                    sconcat(evid("z"), estring("test")),
                 ]),
             ),
         ),

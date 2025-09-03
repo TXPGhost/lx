@@ -72,3 +72,4 @@ pub trait NodeExt: NodeElt + Sized {
         Node::new(self, meta)
     }
 }
+impl<T: NodeElt + Sized> NodeExt for T {}

@@ -55,6 +55,7 @@ pub enum Expr<'a, M: NodeMeta> {
     Prim(Prim),
     Struct(Struct<'a, M>),
     Block(Block<'a, M>),
+    Unop(Unop<'a, M>),
     Binop(Binop<'a, M>),
     Func(Func<'a, M>),
     Call(Call<'a, M>),
@@ -63,10 +64,16 @@ pub enum Expr<'a, M: NodeMeta> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Unop<'a, M: NodeMeta> {
+    pub op: UnopKind,
+    pub expr: Node<Expr<'a, M>, M>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Binop<'a, M: NodeMeta> {
-    pub left: Node<Expr<'a, M>, M>,
+    pub lhs: Node<Expr<'a, M>, M>,
     pub op: BinopKind,
-    pub right: Node<Expr<'a, M>, M>,
+    pub rhs: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -139,6 +146,7 @@ pub enum Stmt<'a, M: NodeMeta> {
     Write(Write<'a, M>),
     Update(Update<'a, M>),
     Expr(Node<Expr<'a, M>, M>),
+    Spacer,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -149,4 +157,10 @@ pub enum BinopKind {
     Div,
     Pow,
     Concat,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum UnopKind {
+    Copy,
+    Neg,
 }
