@@ -205,7 +205,7 @@ fn main() {
         ),
     ]);
 
-    println!("{}", ast.elt.borrow().pretty_print_string());
+    println!("{}", ast.get().pretty_print_string());
 
     // let ir = ast.into_ir(None).unwrap();
     // let ans = ir.eval(&mut HashMap::new()).unwrap();

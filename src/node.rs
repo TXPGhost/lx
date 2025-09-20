@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 
 pub trait NodeElt: Clone + Debug + PartialEq + Eq {}
@@ -60,6 +60,14 @@ impl<T: NodeElt, M: NodeMeta> Node<T, M> {
         F: FnOnce(&mut M),
     {
         f(&mut self.meta.borrow_mut())
+    }
+
+    pub fn get(&self) -> Ref<'_, T> {
+        self.elt.borrow()
+    }
+
+    pub fn get_mut(&self) -> RefMut<'_, T> {
+        self.elt.borrow_mut()
     }
 }
 
