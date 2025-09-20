@@ -138,7 +138,7 @@ fn main() {
                 field(
                     vid("normalize"),
                     efunc(
-                        params([param(vid("self"), etid("Vector3"))]),
+                        params([param_mut(vid("self"), etid("Vector3"))]),
                         eblock([
                             sbind(
                                 vid("len"),
@@ -156,7 +156,7 @@ fn main() {
         field(
             vid("main"),
             efunc(
-                params([param(vid("io"), etid("IO"))]),
+                params([param_mut(vid("io"), etid("IO"))]),
                 eblock([
                     sbind(
                         vid("vec_a"),
