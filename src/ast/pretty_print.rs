@@ -201,6 +201,13 @@ impl<'a, M: NodeMeta> PrettyPrint for Field<'a, M> {
     }
 }
 
+impl<'a, M: NodeMeta> PrettyPrint for Arg<'a, M> {
+    fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
+        ctxt.color(if self.is_mut { "*" } else { "" }, ctxt.cs.punctuation)
+            + &self.expr.get().pretty_print(&mut ctxt.indented())
+    }
+}
+
 impl<'a, M: NodeMeta> PrettyPrint for Param<'a, M> {
     fn pretty_print(&self, ctxt: &mut PrettyPrintContext) -> String {
         ctxt.add_argument(self.ident.name.as_ref().to_owned());
@@ -406,7 +413,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Call<'a, M> {
         let mut s = String::new();
         if self.method_syntax {
             assert!(!self.args.get().args.is_empty());
-            s += &self.args.get().args[0].get().expr.get().pretty_print(ctxt);
+            s += &self.args.get().args[0].get().pretty_print(ctxt);
             s += &ctxt.color(":", ctxt.cs.punctuation);
         }
         let mut func = self.func.get().clone();
@@ -435,7 +442,7 @@ impl<'a, M: NodeMeta> PrettyPrint for Call<'a, M> {
         s += &ctxt.color("(", ctxt.cs.operator);
         let start_idx = if self.method_syntax { 1 } else { 0 };
         for i in start_idx..self.args.get().args.len() {
-            s += &self.args.get().args[i].get().expr.get().pretty_print(ctxt);
+            s += &self.args.get().args[i].get().pretty_print(ctxt);
             if i < self.args.get().args.len() - 1 {
                 s += &ctxt.color(",", ctxt.cs.punctuation);
                 s += " ";

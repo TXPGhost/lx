@@ -188,6 +188,16 @@ fn main() {
                         ]),
                     )),
                     sspacer(),
+                    sexpr(ecall(
+                        eproj(etid("Vector3"), vid("normalize")),
+                        args([arg_mut(evid("vec_a"))]),
+                    )),
+                    sexpr(ecall(
+                        eproj(evid("vec_b"), vid("normalize")),
+                        args([arg_mut(evid("vec_b"))]),
+                    )),
+                    sexpr(emethod(evid("normalize"), args([arg_mut(evid("vec_c"))]))),
+                    sspacer(),
                     sbind(
                         vid("x"),
                         ecall(
