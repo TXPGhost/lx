@@ -1,7 +1,18 @@
 use super::*;
 
-pub fn args<'a, M: NodeMeta>(args: impl Into<Vec<Node<Arg<'a, M>, M>>>) -> Args<'a, M> {
-    Args { args: args.into() }
+pub fn params<'a, M: NodeMeta>(
+    args: impl Into<Vec<Node<Param<'a, M>, M>>>,
+) -> Node<Params<'a, M>, M> {
+    Node::new(
+        Params {
+            params: args.into(),
+        },
+        M::default(),
+    )
+}
+
+pub fn args<'a, M: NodeMeta>(args: impl Into<Vec<Node<Arg<'a, M>, M>>>) -> Node<Args<'a, M>, M> {
+    Node::new(Args { args: args.into() }, M::default())
 }
 
 pub fn estruct<'a, M: NodeMeta>(
@@ -38,48 +49,6 @@ pub fn field<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<
     Node::new(Field::Field(ident, expr), M::default())
 }
 
-pub fn arg<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Arg<'a, M>, M> {
-    Node::new(
-        Arg::Named(NamedArg {
-            is_mut: false,
-            name: ident,
-            value: expr,
-        }),
-        M::default(),
-    )
-}
-
-pub fn arg_mut<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Arg<'a, M>, M> {
-    Node::new(
-        Arg::Named(NamedArg {
-            is_mut: true,
-            name: ident,
-            value: expr,
-        }),
-        M::default(),
-    )
-}
-
-pub fn aident<M: NodeMeta>(ident: Ident) -> Node<Arg<'static, M>, M> {
-    Node::new(
-        Arg::Ident(IdentArg {
-            is_mut: false,
-            name: ident,
-        }),
-        M::default(),
-    )
-}
-
-pub fn aident_mut<M: NodeMeta>(ident: Ident) -> Node<Arg<'static, M>, M> {
-    Node::new(
-        Arg::Ident(IdentArg {
-            is_mut: true,
-            name: ident,
-        }),
-        M::default(),
-    )
-}
-
 pub fn fspacer<'a, M: NodeMeta>() -> Node<Field<'a, M>, M> {
     Node::new(Field::Spacer, M::default())
 }
@@ -100,7 +69,7 @@ pub fn vid(name: &'static str) -> Ident {
         name,
         is_type: false,
         is_void: false,
-        nhoist: 0,
+        nshadow: 0,
     }
 }
 
@@ -112,7 +81,7 @@ pub fn tid(name: &'static str) -> Ident {
         name,
         is_type: true,
         is_void: false,
-        nhoist: 0,
+        nshadow: 0,
     }
 }
 
@@ -121,13 +90,13 @@ pub fn void() -> Ident {
         name: "_".into(),
         is_type: false,
         is_void: true,
-        nhoist: 0,
+        nshadow: 0,
     }
 }
 
-pub fn hoist(ident: Ident, by: usize) -> Ident {
+pub fn unshadow(ident: Ident, by: usize) -> Ident {
     Ident {
-        nhoist: by,
+        nshadow: by,
         ..ident
     }
 }
@@ -266,10 +235,10 @@ pub fn eblock<'a, M: NodeMeta>(
 }
 
 pub fn efunc<'a, M: NodeMeta>(
-    args: Args<'a, M>,
+    params: Node<Params<'a, M>, M>,
     body: Node<Expr<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
-    Node::new(Expr::Func(Func { args, body }), M::default())
+    Node::new(Expr::Func(Func { params, body }), M::default())
 }
 
 pub fn eproj<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>, field: Ident) -> Node<Expr<'a, M>, M> {
@@ -278,25 +247,93 @@ pub fn eproj<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>, field: Ident) -> Node<
 
 pub fn call<'a, M: NodeMeta>(
     func: Node<Expr<'a, M>, M>,
-    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
+    args: Node<Args<'a, M>, M>,
 ) -> Call<'a, M> {
     Call {
         func,
-        args: args.into(),
+        args,
         method_syntax: false,
     }
 }
 
 pub fn ecall<'a, M: NodeMeta>(
     func: Node<Expr<'a, M>, M>,
-    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
+    args: Node<Args<'a, M>, M>,
 ) -> Node<Expr<'a, M>, M> {
     Node::new(
         Expr::Call(Call {
             func,
-            args: args.into(),
+            args,
             method_syntax: false,
         }),
+        M::default(),
+    )
+}
+
+pub fn emethod<'a, M: NodeMeta>(
+    func: Node<Expr<'a, M>, M>,
+    args: Node<Args<'a, M>, M>,
+) -> Node<Expr<'a, M>, M> {
+    Node::new(
+        Expr::Call(Call {
+            func,
+            args,
+            method_syntax: true,
+        }),
+        M::default(),
+    )
+}
+
+pub fn eargs<'a, M: NodeMeta>(args: impl Into<Vec<Node<Arg<'a, M>, M>>>) -> Node<Args<'a, M>, M> {
+    Node::new(Args { args: args.into() }, M::default())
+}
+
+pub fn eparams<'a, M: NodeMeta>(
+    params: impl Into<Vec<Node<Param<'a, M>, M>>>,
+) -> Node<Params<'a, M>, M> {
+    Node::new(
+        Params {
+            params: params.into(),
+        },
+        M::default(),
+    )
+}
+
+pub fn arg<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>) -> Node<Arg<'a, M>, M> {
+    Node::new(
+        Arg {
+            expr,
+            is_mut: false,
+        },
+        M::default(),
+    )
+}
+
+pub fn param<'a, M: NodeMeta>(ident: Ident, expr: Node<Expr<'a, M>, M>) -> Node<Param<'a, M>, M> {
+    Node::new(
+        Param {
+            ident,
+            expr,
+            is_mut: false,
+        },
+        M::default(),
+    )
+}
+
+pub fn arg_mut<'a, M: NodeMeta>(expr: Node<Expr<'a, M>, M>) -> Node<Arg<'a, M>, M> {
+    Node::new(Arg { expr, is_mut: true }, M::default())
+}
+
+pub fn param_mut<'a, M: NodeMeta>(
+    ident: Ident,
+    expr: Node<Expr<'a, M>, M>,
+) -> Node<Param<'a, M>, M> {
+    Node::new(
+        Param {
+            ident,
+            expr,
+            is_mut: true,
+        },
         M::default(),
     )
 }
@@ -311,37 +348,6 @@ pub fn econstructor<'a, M: NodeMeta>(
             fields: Struct {
                 fields: fields.into(),
             },
-        }),
-        M::default(),
-    )
-}
-
-pub fn method<'a, M: NodeMeta>(
-    obj: Node<Expr<'a, M>, M>,
-    func: Node<Expr<'a, M>, M>,
-    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
-) -> Call<'a, M> {
-    let mut args = args.into();
-    args.insert(0, obj);
-    Call {
-        func,
-        args,
-        method_syntax: true,
-    }
-}
-
-pub fn emethod<'a, M: NodeMeta>(
-    obj: Node<Expr<'a, M>, M>,
-    func: Node<Expr<'a, M>, M>,
-    args: impl Into<Vec<Node<Expr<'a, M>, M>>>,
-) -> Node<Expr<'a, M>, M> {
-    let mut args = args.into();
-    args.insert(0, obj);
-    Node::new(
-        Expr::Call(Call {
-            func,
-            args,
-            method_syntax: true,
         }),
         M::default(),
     )

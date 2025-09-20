@@ -16,6 +16,24 @@ pub struct Args<'a, M: NodeMeta> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Arg<'a, M: NodeMeta> {
+    pub expr: Node<Expr<'a, M>, M>,
+    pub is_mut: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Params<'a, M: NodeMeta> {
+    pub params: Vec<Node<Param<'a, M>, M>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Param<'a, M: NodeMeta> {
+    pub ident: Ident,
+    pub expr: Node<Expr<'a, M>, M>,
+    pub is_mut: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Field<'a, M: NodeMeta> {
     Field(Ident, Node<Expr<'a, M>, M>),
     Inline(Expr<'a, M>),
@@ -23,22 +41,16 @@ pub enum Field<'a, M: NodeMeta> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NamedArg<'a, M: NodeMeta> {
+pub struct NamedParam<'a, M: NodeMeta> {
     pub is_mut: bool,
     pub name: Ident,
     pub value: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct IdentArg {
+pub struct IdentParam {
     pub is_mut: bool,
     pub name: Ident,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Arg<'a, M: NodeMeta> {
-    Named(NamedArg<'a, M>),
-    Ident(IdentArg),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -46,7 +58,7 @@ pub struct Ident {
     pub name: Rc<str>,
     pub is_type: bool,
     pub is_void: bool,
-    pub nhoist: usize,
+    pub nshadow: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -90,14 +102,14 @@ pub struct Project<'a, M: NodeMeta> {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Func<'a, M: NodeMeta> {
-    pub args: Args<'a, M>,
+    pub params: Node<Params<'a, M>, M>,
     pub body: Node<Expr<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Call<'a, M: NodeMeta> {
     pub func: Node<Expr<'a, M>, M>,
-    pub args: Vec<Node<Expr<'a, M>, M>>,
+    pub args: Node<Args<'a, M>, M>,
     pub method_syntax: bool,
 }
 
