@@ -47,7 +47,7 @@ pub struct Write<'a, M: NodeMeta> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct<'a, M: NodeMeta> {
     pub fields: HashMap<Ident, Node<Expr<'a, M>, M>>,
-    pub parent: Option<Node<Expr<'a, M>, M>>,
+    pub parent: Option<NodeWeak<Expr<'a, M>, M>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -58,14 +58,14 @@ pub struct Call<'a, M: NodeMeta> {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Func<'a, M: NodeMeta> {
-    pub args: Node<Args<'a, M>, M>,
+    pub params: Node<Params<'a, M>, M>,
     pub body: Node<Block<'a, M>, M>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Args<'a, M: NodeMeta> {
-    pub args: HashMap<Ident, Arg<'a, M>>,
-    pub parent: Option<Node<Expr<'a, M>, M>>,
+pub struct Params<'a, M: NodeMeta> {
+    pub params: HashMap<Ident, Arg<'a, M>>,
+    pub parent: Option<NodeWeak<Expr<'a, M>, M>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

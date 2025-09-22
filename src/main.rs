@@ -4,6 +4,7 @@ pub mod colorscheme;
 pub mod ir;
 pub mod node;
 // pub mod subtype;
+pub mod lexer;
 
 use ast::helpers::*;
 // use ir::IntoIr;
